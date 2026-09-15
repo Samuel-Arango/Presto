@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
     FlutterNativeSplash.remove();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: _OpenAddBook,
+        onPressed: null,
         child: const Icon(Icons.add),
       ),
       body: SafeArea(
