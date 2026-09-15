@@ -62,25 +62,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: "Correo electronico",
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Ingresa tu correo";
-                  }
-                  if (!value.contains('@')) {
-                    return "Correo no valido";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(

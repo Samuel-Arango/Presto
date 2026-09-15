@@ -9,8 +9,19 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void _OpenAddBook() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AddBookPage()),
+      );
+    }
+
     FlutterNativeSplash.remove();
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _OpenAddBook,
+        child: const Icon(Icons.add),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,6 +41,18 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class AddBookPage extends StatelessWidget {
+  const AddBookPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Añadir libro')),
+      body: const Center(child: Text('Añadir libro')),
     );
   }
 }
