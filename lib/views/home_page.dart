@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:presto/views/new_book.dart';
 
 import '../layouts/presto_title.dart';
 import '../layouts/search_books_view.dart';
@@ -12,7 +13,12 @@ class HomePage extends StatelessWidget {
     FlutterNativeSplash.remove();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: null,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NewBook()),
+          );
+        },
         child: const Icon(Icons.add),
       ),
       body: SafeArea(
