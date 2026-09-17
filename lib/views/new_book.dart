@@ -85,7 +85,7 @@ class _NewBookState extends State<NewBook> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _categoria,
+                initialValue: _categoria,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Categoría',

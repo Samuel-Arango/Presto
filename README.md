@@ -23,6 +23,7 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Registro de nuevos usuarios con validación de contraseña y confirmación
 - [x] Flujo de autenticación: Login → Registro → Login → Home
 - [x] Pantalla principal (Home) con bienvenida, perfil y sección de préstamos
+- [x] Botón flotante (+) para agregar libros (en desarrollo)
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
 - [x] Buscador de libros como layout reutilizable (`SearchBooksView`)
 - [ ] Autenticación real (backend / base de datos)
@@ -138,6 +139,7 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 - [ ] Conectar login y registro a una base de datos (local con SQLite o remota con Firebase/API propia)
 - [ ] Implementar lógica de autenticación real (validar credenciales contra la BD)
+- [ ] Pantalla para agregar libros (formulario conectado al botón `+`)
 - [ ] Agregar gestión de estado (Provider / Riverpod / Bloc)
 - [ ] Sistema de préstamos: solicitar, devolver, historial
 - [ ] Notificaciones de devoluciones próximas a vencer
@@ -160,7 +162,9 @@ Este es un proyecto en construcción. Si quieres contribuir:
 
 ## 📄 Licencia
 
-MIT
+Este proyecto está bajo la licencia **MIT** — para más detalles, consulta el archivo [LICENSE](LICENSE).
+
+Copyright (c) 2026 **Samuel Arango Cuesta**
 
 ---
 
