@@ -1,10 +1,10 @@
-# 📚 Presto: Sistema de Gestión de Préstamos Bibliotecarios
+# Presto - Sistema de Gestión de Préstamos Bibliotecarios
 
 Presto es una aplicación móvil y de escritorio construida con **Flutter**, diseñada para modernizar y optimizar los procesos de préstamo y devolución de libros en bibliotecas modernas o escolares. El nombre "Presto" evoca rapidez y facilidad, reflejando el objetivo principal: hacer que el proceso de tomar o devolver un libro sea instantáneo y sin fricciones, tanto para los bibliotecarios como para los usuarios.
 
 ---
 
-## 🎯 Objetivos principales
+## Objetivos principales
 
 - **Digitalización de procesos:** reemplazar los registros en papel o sistemas obsoletos por una interfaz digital, intuitiva y centralizada.
 - **Acceso remoto:** permitir a los usuarios consultar el catálogo, reservar libros y ver el estado de sus préstamos desde cualquier lugar.
@@ -13,7 +13,7 @@ Presto es una aplicación móvil y de escritorio construida con **Flutter**, dis
 
 ---
 
-## ✅ Estado actual del proyecto
+## Estado actual del proyecto
 
 Este proyecto está en desarrollo activo. Actualmente incluye:
 
@@ -33,7 +33,7 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## Tecnologías utilizadas
 
 - **[Flutter](https://flutter.dev/)** — framework de UI multiplataforma
 - **Dart** — lenguaje de programación
@@ -43,7 +43,7 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 lib/
@@ -65,7 +65,7 @@ assets/
 
 ---
 
-## 🚀 Cómo ejecutar el proyecto
+## Cómo ejecutar el proyecto
 
 ### Requisitos previos
 
@@ -105,7 +105,7 @@ assets/
 
 ---
 
-## 🛠️ Configuración de recursos nativos
+## Configuración de recursos nativos
 
 Para regenerar el splash screen o los íconos tras modificar `pubspec.yaml`:
 
@@ -116,7 +116,7 @@ dart run flutter_launcher_icons:generate       # Íconos de app
 
 ---
 
-## 🧩 Funcionalidades
+## Funcionalidades
 
 ### Splash screen
 Splash nativo personalizado con soporte para Android 12+ mediante la sección `android_12` en el `pubspec.yaml`.
@@ -135,7 +135,7 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Conectar login y registro a una base de datos (local con SQLite o remota con Firebase/API propia)
 - [ ] Implementar lógica de autenticación real (validar credenciales contra la BD)
@@ -148,7 +148,7 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 ---
 
-## 🤝 Contribuciones
+## Contribuciones
 
 Este es un proyecto en construcción. Si quieres contribuir:
 
@@ -160,14 +160,15 @@ Este es un proyecto en construcción. Si quieres contribuir:
 
 ---
 
-## 📄 Licencia
+## Desarrolladores
+
+- **Samuel Arango Cuesta** — [Vssmxlls](https://github.com/Vssmxlls)
+- **Harold Diaz** — [hide165-design](https://github.com/hide165-design)
+
+---
+
+## Licencia
 
 Este proyecto está bajo la licencia **MIT** — para más detalles, consulta el archivo [LICENSE](LICENSE).
 
 Copyright (c) 2026 **Samuel Arango Cuesta**
-
----
-
-## 👤 Autor
-
-Desarrollado por [Vssmxlls](https://github.com/Vssmxlls)
