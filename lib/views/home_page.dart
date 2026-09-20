@@ -4,6 +4,8 @@ import 'package:presto/views/new_book.dart';
 
 import '../layouts/presto_title.dart';
 import '../layouts/search_books_view.dart';
+import '../models_books/loan.dart';
+import 'loan_registration.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -31,6 +33,7 @@ class HomePage extends StatelessWidget {
             ),
             _WelcomeSection(),
             _LoansSection(),
+            _LoanRegistrationButton(),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -92,45 +95,68 @@ class _LoansSection extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: 90,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _demoLoans.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 220,
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
+            child: ValueListenableBuilder<List<Loan>>(
+              valueListenable: loans,
+              builder: (context, currentLoans, _) {
+                if (currentLoans.isEmpty) {
+                  return const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Aún no tienes préstamos registrados',
+                      style: TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                  );
+                }
+                final items = currentLoans.reversed.toList();
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final loan = items[index];
+                    return Container(
+                      width: 220,
+                      margin: const EdgeInsets.only(right: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _demoLoans[index].title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loan.book.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Préstamo: ${formatDate(loan.date)}',
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            'Devolución: ${formatDate(loan.dueDate)}',
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _demoLoans[index].due,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),
@@ -141,8 +167,23 @@ class _LoansSection extends StatelessWidget {
   }
 }
 
-const _demoLoans = [
-  (title: "Cien años de soledad", due: "Devuelves en 3 días"),
-  (title: "El túnel", due: "Devuelves en 7 días"),
-  (title: "Ficciones", due: "Devuelves en 12 días"),
-];
+class _LoanRegistrationButton extends StatelessWidget {
+  const _LoanRegistrationButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.assignment),
+        label: const Text('Registro de préstamos'),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoanRegistration()),
+          );
+        },
+      ),
+    );
+  }
+}
