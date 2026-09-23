@@ -23,7 +23,8 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Registro de nuevos usuarios con validación de contraseña y confirmación
 - [x] Flujo de autenticación: Login → Registro → Login → Home
 - [x] Pantalla principal (Home) con bienvenida, perfil y sección de préstamos
-- [x] Botón flotante (+) para agregar libros (en desarrollo)
+- [x] Registro de préstamos con fecha de devolución automática (15 días)
+- [x] Pantalla "Nuevo libro" con formulario (título, fecha de publicación, categoría, autor)
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
 - [x] Buscador de libros como layout reutilizable (`SearchBooksView`)
 - [ ] Autenticación real (backend / base de datos)
@@ -51,12 +52,15 @@ lib/
 │   ├── presto_title.dart       # Encabezado con logo y nombre de la app
 │   └── search_books_view.dart  # Buscador reutilizable con catálogo y sugerencias
 ├── models_books/
-│   └── book.dart               # Modelo de datos Book y catálogo de ejemplo
+│   ├── book.dart               # Modelo de datos Book y catálogo de ejemplo
+│   └── loan.dart               # Modelo de préstamo (Loan) con cálculo de fecha de devolución
 ├── views/
 │   ├── login_screen.dart       # Pantalla de entrada: degradado + formulario de login
 │   ├── home_page.dart          # Pantalla principal: bienvenida, perfil, préstamos y buscador
 │   ├── login_page.dart         # Formulario de inicio de sesión
-│   └── registration_page.dart  # Pantalla de registro de usuario
+│   ├── registration_page.dart  # Pantalla de registro de usuario
+│   ├── loan_registration.dart  # Registro de préstamos con devolución automática a 15 días
+│   └── new_book.dart           # Pantalla para agregar un nuevo libro
 └── main.dart                   # Punto de entrada de la app
 
 assets/
@@ -124,6 +128,12 @@ Splash nativo personalizado con soporte para Android 12+ mediante la sección `a
 ### Pantalla principal (Home)
 Bienvenida con el nombre de usuario, avatar de perfil, sección de préstamos (con datos de ejemplo) y el buscador de libros integrado como layout reutilizable.
 
+### Registro de préstamos
+Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo, se muestra el histórico de préstamos registrados y se sincroniza con la sección "Mis préstamos" del Home.
+
+### Nuevo libro
+Formulario para agregar un libro al catálogo con nombre, fecha de publicación (selector de fecha), categoría (desplegable) y autor.
+
 ### Inicio de sesión
 Formulario con validación de usuario y contraseña, con opción de redirigir al registro si el usuario no tiene cuenta.
 
@@ -137,14 +147,13 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 ## Roadmap
 
-- [ ] Conectar login y registro a una base de datos (local con SQLite o remota con Firebase/API propia)
-- [ ] Implementar lógica de autenticación real (validar credenciales contra la BD)
-- [ ] Pantalla para agregar libros (formulario conectado al botón `+`)
-- [ ] Agregar gestión de estado (Provider / Riverpod / Bloc)
-- [ ] Sistema de préstamos: solicitar, devolver, historial
+### Backend
+
+- [ ] Base de datos local (SQLite) o remota (Firebase / API propia)
+- [ ] Persistencia de usuarios, libros y préstamos
+- [ ] Lógica de autenticación real (validar credenciales contra la base de datos)
+- [ ] Lógica de gestión de préstamos y devoluciones
 - [ ] Notificaciones de devoluciones próximas a vencer
-- [ ] Panel administrativo para bibliotecarios
-- [ ] Tests unitarios y de widgets
 
 ---
 
@@ -164,6 +173,7 @@ Este es un proyecto en construcción. Si quieres contribuir:
 
 - **Samuel Arango Cuesta** — [Vssmxlls](https://github.com/Vssmxlls)
 - **Harold Diaz** — [hide165-design](https://github.com/hide165-design)
+- **Luis Enrique Ruiz Reyes** — [leruizr](https://github.com/leruizr)
 
 ---
 
