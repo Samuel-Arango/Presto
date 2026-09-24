@@ -33,6 +33,7 @@ class HomePage extends StatelessWidget {
             ),
             _WelcomeSection(),
             _LoansSection(),
+            // Botón que abre la pantalla de registro de préstamos.
             _LoanRegistrationButton(),
             Expanded(
               child: Padding(
@@ -95,9 +96,11 @@ class _LoansSection extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: 90,
+            // Escucha la lista de préstamos: se redibuja cuando se registra uno.
             child: ValueListenableBuilder<List<Loan>>(
               valueListenable: loans,
               builder: (context, currentLoans, _) {
+                // Si todavía no hay préstamos, se muestra un aviso.
                 if (currentLoans.isEmpty) {
                   return const Align(
                     alignment: Alignment.centerLeft,
@@ -107,6 +110,7 @@ class _LoansSection extends StatelessWidget {
                     ),
                   );
                 }
+                // Se invierte la lista para ver primero el préstamo más reciente.
                 final items = currentLoans.reversed.toList();
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
@@ -167,6 +171,7 @@ class _LoansSection extends StatelessWidget {
   }
 }
 
+// Botón "Registro de préstamos": navega a la pantalla LoanRegistration.
 class _LoanRegistrationButton extends StatelessWidget {
   const _LoanRegistrationButton();
 

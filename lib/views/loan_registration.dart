@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models_books/book.dart';
 import '../models_books/loan.dart';
 
+// Pantalla para registrar el préstamo de un libro a un usuario (RF09).
 class LoanRegistration extends StatefulWidget {
   const LoanRegistration({super.key});
 
@@ -11,6 +12,7 @@ class LoanRegistration extends StatefulWidget {
 }
 
 class _LoanRegistrationState extends State<LoanRegistration> {
+  // Permite validar todos los campos del formulario a la vez.
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _userController = TextEditingController();
@@ -19,11 +21,13 @@ class _LoanRegistrationState extends State<LoanRegistration> {
 
   Book? _book;
   DateTime? _date;
+  // Cambia al registrar un préstamo para reiniciar el desplegable de libros.
   int _formVersion = 0;
 
   @override
   void initState() {
     super.initState();
+    // Por defecto, la fecha del préstamo es hoy.
     _setDate(DateTime.now());
   }
 
@@ -35,12 +39,14 @@ class _LoanRegistrationState extends State<LoanRegistration> {
     super.dispose();
   }
 
+  // Guarda la fecha del préstamo y calcula la fecha de devolución.
   void _setDate(DateTime date) {
     _date = date;
     _dateController.text = formatDate(date);
     _dueDateController.text = formatDate(dueDateFrom(date));
   }
 
+  // Abre el calendario para elegir la fecha del préstamo.
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -54,6 +60,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
     }
   }
 
+  // Valida el formulario, guarda el préstamo, avisa y limpia los campos.
   void _registerLoan() {
     if (_formKey.currentState!.validate()) {
       final loan = Loan(
@@ -99,6 +106,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
           key: _formKey,
           child: ListView(
             children: [
+              // Usuario: campo obligatorio.
               TextFormField(
                 controller: _userController,
                 decoration: const InputDecoration(
@@ -115,6 +123,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
               ),
               const SizedBox(height: 16),
 
+              // Libro: se elige de la lista del catálogo.
               DropdownButtonFormField<Book>(
                 key: ValueKey(_formVersion),
                 initialValue: _book,
@@ -145,6 +154,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
               ),
               const SizedBox(height: 16),
 
+              // Fecha del préstamo: solo se cambia con el calendario.
               TextFormField(
                 controller: _dateController,
                 readOnly: true,
@@ -163,6 +173,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
               ),
               const SizedBox(height: 16),
 
+              // Fecha de devolución: solo lectura, se calcula sola.
               TextFormField(
                 controller: _dueDateController,
                 readOnly: true,
@@ -184,6 +195,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
                 onPressed: _registerLoan,
               ),
 
+              // Lista de los préstamos registrados (el más reciente primero).
               if (loans.value.isNotEmpty) ...[
                 const SizedBox(height: 32),
                 const Text(
