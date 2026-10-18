@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:presto/views/new_book.dart';
 
+import '../layouts/menu_lateral.dart';
 import '../layouts/presto_title.dart';
 import '../layouts/search_books_view.dart';
 import '../models_books/loan.dart';
@@ -14,6 +15,8 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     FlutterNativeSplash.remove();
     return Scaffold(
+      // Menú lateral: se abre con el botón ☰ o deslizando desde la izquierda.
+      drawer: const MenuLateral(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -57,6 +60,12 @@ class _WelcomeSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+          // Botón que abre el menú lateral del Home.
+          IconButton(
+            tooltip: 'Abrir menú',
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            icon: const Icon(Icons.menu),
+          ),
           const CircleAvatar(radius: 24, child: Icon(Icons.person)),
           const SizedBox(width: 12),
           const Column(
