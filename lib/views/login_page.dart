@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return "Ingresa tu usuario";
                   }
                   return null;
@@ -96,10 +96,11 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      final nombreUsuario = _userController.text.trim();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomePage(),
+                          builder: (context) => HomePage(nombreUsuario: nombreUsuario),
                         ),
                       );
                     }

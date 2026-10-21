@@ -9,7 +9,8 @@ import '../models_books/loan.dart';
 import 'loan_registration.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String nombreUsuario;
+  const HomePage({super.key, required this.nombreUsuario});
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +30,16 @@ class HomePage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: const [
-            Padding(
+          children: [
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: PrestoTitle(),
             ),
-            _WelcomeSection(),
-            _LoansSection(),
+            _WelcomeSection(nombreUsuario: nombreUsuario),
+            const _LoansSection(),
             // Botón que abre la pantalla de registro de préstamos.
-            _LoanRegistrationButton(),
-            Expanded(
+            const _LoanRegistrationButton(),
+            const Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: SearchBooksView(),
@@ -52,8 +53,9 @@ class HomePage extends StatelessWidget {
 }
 
 class _WelcomeSection extends StatelessWidget {
-  const _WelcomeSection();
-
+    final String nombreUsuario;
+  const _WelcomeSection({required this.nombreUsuario});
+  
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -68,17 +70,26 @@ class _WelcomeSection extends StatelessWidget {
           ),
           const CircleAvatar(radius: 24, child: Icon(Icons.person)),
           const SizedBox(width: 12),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Bienvenido/a,', style: TextStyle(color: Colors.black54)),
-              Text(
-                'Nombre de usuario',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Bienvenido/a,',
+                  style: TextStyle(color: Colors.black54),
           ),
-          const Spacer(),
+          Text(
+                  nombreUsuario,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1, // Solo una línea...
+                  overflow: TextOverflow.ellipsis, // ...y "..." si no cabe.
+                ),
+              ],
+            ),
+          ),
           IconButton(onPressed: _openProfile, icon: const Icon(Icons.settings)),
         ],
       ),

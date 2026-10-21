@@ -61,6 +61,32 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 },
               ),
               const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Correo electrónico",
+                  hintText:
+                      "ejemplo@correo.com",
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+
+                validator: (value) {
+                  // El campo no puede estar vacío.
+                  if (value == null || value.trim().isEmpty) {
+                    return "Ingresa tu correo electrónico";
+                  }
+
+                  final formatoCorreo = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                  if (!formatoCorreo.hasMatch(value.trim())) {
+                    return "Ingresa un correo válido (ej: nombre@correo.com)";
+                  }
+                  return null; // Correo correcto.
+                },
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
