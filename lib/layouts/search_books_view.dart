@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../models_books/book.dart';
 
 class SearchBooksView extends StatelessWidget {
@@ -55,15 +54,20 @@ class BookCatalog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: catalog.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: const Icon(Icons.book),
-          title: Text(catalog[index].title),
-          subtitle: Text(catalog[index].author),
+    return ValueListenableBuilder<List<Book>>(
+      valueListenable: books,
+      builder: (context, currentBooks, _) {
+        return ListView.builder(
+          itemCount: currentBooks.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              leading: const Icon(Icons.book),
+              title: Text(currentBooks[index].title),
+              subtitle: Text(currentBooks[index].author),
+            );
+          }
         );
-      },
+      }
     );
   }
 }
@@ -109,9 +113,9 @@ class _CustomSearchDelegate extends SearchDelegate {
   List<Book> _searchBooks(String query) {
     final q = query.trim().toLowerCase();
     if (q.isEmpty) {
-      return catalog;
+      return books.value;
     }
-    return catalog
+    return books.value
         .where(
           (book) =>
               book.title.toLowerCase().contains(q) ||
