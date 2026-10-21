@@ -134,7 +134,7 @@ class _LoanRegistrationState extends State<LoanRegistration> {
                   prefixIcon: Icon(Icons.book),
                 ),
                 items: [
-                  for (final book in catalog)
+                  for (final book in books.value)
                     DropdownMenuItem(
                       value: book,
                       child: Text(book.title, overflow: TextOverflow.ellipsis),

@@ -57,6 +57,54 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "Nombre",
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Ingresa tu nombre";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Correo electrónico",
+                  hintText:
+                      "ejemplo@correo.com",
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+
+                validator: (value) {
+                  // El campo no puede estar vacío.
+                  if (value == null || value.trim().isEmpty) {
+                    return "Ingresa tu correo electrónico";
+                  }
+
+                  final formatoCorreo = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                  if (!formatoCorreo.hasMatch(value.trim())) {
+                    return "Ingresa un correo válido (ej: nombre@correo.com)";
+                  }
+                  return null; // Correo correcto.
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Contraseña",
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
               const SizedBox(height: 8),
               const Text(
                 "Crear cuenta",

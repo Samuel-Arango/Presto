@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models_books/book.dart';
+
 class NewBook extends StatefulWidget {
   const NewBook({super.key});
 
@@ -12,31 +14,65 @@ class _NewBookState extends State<NewBook> {
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _autorController = TextEditingController();
 
   String? _categoria;
+  DateTime? _fechapubli;
+  int _form = 0;
 
   @override
   void dispose() {
     _titleController.dispose();
     _dateController.dispose();
+    _autorController.dispose();
     super.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _fechapubli ?? DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(),
     );
 
     if (picked != null) {
       setState(() {
+        _fechapubli = picked;
         _dateController.text =
             "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
       });
     }
   }
+
+    // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
+  void _guardarLibro() {
+    if (_formKey.currentState!.validate()) {
+      final book = Book(
+        title: _titleController.text.trim(),
+        author: _autorController.text.trim(),
+        category: _categoria,
+        publishedDate: _fechapubli,
+      );
+      addLibro(book);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Libro "${book.title}" agregado al catálogo')),
+      );
+
+      FocusScope.of(context).unfocus();
+      _formKey.currentState!.reset();
+      setState(() {
+        _titleController.clear();
+        _dateController.clear();
+        _autorController.clear();
+        _categoria = null;
+        _fechapubli = null;
+        _form++;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +94,24 @@ class _NewBookState extends State<NewBook> {
             children: [
               TextFormField(
                 controller: _titleController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Nombre del libro',
                   prefixIcon: Icon(Icons.book),
                 ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Ingresa el nombre del libro';
+                  }
+                  if (value.trim().length < 2) {
+                    return 'Mínimo 2 caracteres';
+                  }
+                  if (existeLibro(value, _autorController.text)) {
+                    return 'Este libro ya está en el catálogo';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -85,6 +134,7 @@ class _NewBookState extends State<NewBook> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
+                key: ValueKey(_form),
                 initialValue: _categoria,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -119,11 +169,25 @@ class _NewBookState extends State<NewBook> {
               const SizedBox(height: 16),
 
               TextFormField(
+                controller: _autorController,
+                textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Nombre del autor',
-                  prefixIcon: Icon(Icons.book),
+                  prefixIcon: Icon(Icons.person),
                 ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Ingresa el nombre del autor';
+                  }
+                  if (value.trim().length < 3) {
+                    return 'Mínimo 3 caracteres';
+                  }
+                  if (RegExp(r'\d').hasMatch(value)) {
+                    return 'El nombre del autor no debe tener números';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 32),
 
@@ -133,17 +197,7 @@ class _NewBookState extends State<NewBook> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Libro "${_titleController.text}" guardado exitosamente',
-                        ),
-                      ),
-                    );
-                  }
-                },
+                onPressed: _guardarLibro,
               ),
             ],
           ),
