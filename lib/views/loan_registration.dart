@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../layouts/barra_superior.dart';
 import '../models_books/book.dart';
 import '../models_books/loan.dart';
 
@@ -91,15 +92,8 @@ class _LoanRegistrationState extends State<LoanRegistration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.navigate_before),
-          tooltip: 'Ir al inicio',
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Registro de préstamos"),
-        centerTitle: true,
-      ),
+      // Barra superior reutilizable (layouts/barra_superior.dart).
+      appBar: const BarraSuperior(titulo: 'Registro de préstamos'),
       body: Padding(
         padding: const EdgeInsets.all(64.0),
         child: Form(

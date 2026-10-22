@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../layouts/barra_superior.dart';
+
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -39,17 +41,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FC),
-      appBar: AppBar(
-        title: const Text("Registro"),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3),
-          child: Container(color: const Color(0xFFE8EEF9), height: 3),
-        ),
-      ),
+      // Barra superior reutilizable (layouts/barra_superior.dart).
+      appBar: const BarraSuperior(titulo: 'Registro'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(

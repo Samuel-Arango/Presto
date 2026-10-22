@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../layouts/barra_superior.dart';
 import '../models_books/book.dart';
 
 class NewBook extends StatefulWidget {
@@ -77,15 +78,8 @@ class _NewBookState extends State<NewBook> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.navigate_before),
-          tooltip: 'Ir al inicio',
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text("Nuevo libro"),
-        centerTitle: true,
-      ),
+      // Barra superior reutilizable (layouts/barra_superior.dart).
+      appBar: const BarraSuperior(titulo: 'Nuevo libro'),
       body: Padding(
         padding: const EdgeInsets.all(64.0),
         child: Form(
