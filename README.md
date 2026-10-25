@@ -22,9 +22,12 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Inicio de sesión con validación de formulario
 - [x] Registro de nuevos usuarios con validación de contraseña y confirmación
 - [x] Flujo de autenticación: Login → Registro → Login → Home
-- [x] Pantalla principal (Home) con bienvenida, perfil y sección de préstamos
+- [x] Pantalla principal (Home) con bienvenida personalizada (nombre de usuario), perfil y sección de préstamos
+- [x] Menú lateral de navegación en el Home (Drawer) hacia Nuevo libro y Registro de préstamos
+- [x] Barra superior reutilizable (`BarraSuperior`) usada en varias pantallas
 - [x] Registro de préstamos con fecha de devolución automática (15 días)
-- [x] Pantalla "Nuevo libro" con formulario (título, fecha de publicación, categoría, autor)
+- [x] Pantalla "Nuevo libro" con validación de duplicados y campos obligatorios
+- [x] Catálogo de libros reactivo (`books` ValueNotifier) que se actualiza al agregar un libro
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
 - [x] Buscador de libros como layout reutilizable (`SearchBooksView`)
 - [ ] Autenticación real (backend / base de datos)
@@ -49,22 +52,24 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 ```
 lib/
 ├── layouts/
-│   ├── presto_title.dart       # Encabezado con logo y nombre de la app
-│   └── search_books_view.dart  # Buscador reutilizable con catálogo y sugerencias
+│   ├── barra_superior.dart      # AppBar reutilizable con botón de volver
+│   ├── menu_lateral.dart        # Drawer de navegación del Home
+│   ├── presto_title.dart        # Encabezado con logo y nombre de la app
+│   └── search_books_view.dart   # Buscador reutilizable con catálogo y sugerencias
 ├── models_books/
-│   ├── book.dart               # Modelo de datos Book y catálogo de ejemplo
-│   └── loan.dart               # Modelo de préstamo (Loan) con cálculo de fecha de devolución
+│   ├── book.dart                # Modelo Book (con categoría y fecha) + catálogo reactivo
+│   └── loan.dart                # Modelo de préstamo (Loan) con cálculo de fecha de devolución
 ├── views/
-│   ├── login_screen.dart       # Pantalla de entrada: degradado + formulario de login
-│   ├── home_page.dart          # Pantalla principal: bienvenida, perfil, préstamos y buscador
-│   ├── login_page.dart         # Formulario de inicio de sesión
-│   ├── registration_page.dart  # Pantalla de registro de usuario
-│   ├── loan_registration.dart  # Registro de préstamos con devolución automática a 15 días
-│   └── new_book.dart           # Pantalla para agregar un nuevo libro
-└── main.dart                   # Punto de entrada de la app
+│   ├── login_screen.dart        # Pantalla de entrada: degradado + formulario de login
+│   ├── home_page.dart           # Pantalla principal: bienvenida, préstamos, buscador, Drawer
+│   ├── login_page.dart          # Formulario de inicio de sesión (pasa el nombre al Home)
+│   ├── registration_page.dart   # Pantalla de registro de usuario (con correo)
+│   ├── loan_registration.dart   # Registro de préstamos con devolución automática a 15 días
+│   └── new_book.dart            # Pantalla para agregar un nuevo libro
+└── main.dart                    # Punto de entrada de la app
 
 assets/
-└── images/                     # Logo, splash screen y recursos gráficos
+└── images/                      # Logo, splash screen y recursos gráficos
 ```
 
 ---
@@ -126,13 +131,19 @@ dart run flutter_launcher_icons:generate       # Íconos de app
 Splash nativo personalizado con soporte para Android 12+ mediante la sección `android_12` en el `pubspec.yaml`.
 
 ### Pantalla principal (Home)
-Bienvenida con el nombre de usuario, avatar de perfil, sección de préstamos (con datos de ejemplo) y el buscador de libros integrado como layout reutilizable.
+Bienvenida con el nombre del usuario (pasado desde el login), avatar de perfil, menú lateral (Drawer), sección de préstamos (con datos de ejemplo), botón para registrar préstamos y el buscador de libros integrado como layout reutilizable.
+
+### Menú lateral (Drawer)
+Menú deslizable que permite ir a "Inicio", "Nuevo libro" y "Registro de préstamos" desde el Home.
+
+### Barra superior reutilizable
+`BarraSuperior` (PreferredSizeWidget) con botón de volver y título centrado, usada en las pantallas de Registro, Nuevo libro y otras, evitando duplicar el mismo AppBar.
 
 ### Registro de préstamos
 Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo, se muestra el histórico de préstamos registrados y se sincroniza con la sección "Mis préstamos" del Home.
 
 ### Nuevo libro
-Formulario para agregar un libro al catálogo con nombre, fecha de publicación (selector de fecha), categoría (desplegable) y autor.
+Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Al guardar, agrega el libro a la lista reactiva `books` y limpia el formulario.
 
 ### Inicio de sesión
 Formulario con validación de usuario y contraseña, con opción de redirigir al registro si el usuario no tiene cuenta.
