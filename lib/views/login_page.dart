@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'home_page.dart';
 import 'registration_page.dart';
+import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +24,33 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  void _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final user = await AuthService.instance.login(
+      identifier: _userController.text,
+      password: _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Usuario o contraseña incorrectos'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(nombreUsuario: user.name),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -94,17 +122,7 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      final nombreUsuario = _userController.text.trim();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(nombreUsuario: nombreUsuario),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../layouts/barra_superior.dart';
+import '../services/auth_service.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -26,15 +27,35 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
-  void _register() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Cuenta creada con exito")));
+  void _register() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // Volver al login para que el usuario inicie sesion.
-      Navigator.pop(context);
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    final ok = await AuthService.instance.register(
+      name: name,
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ese correo ya está registrado'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cuenta creada con exito')),
+    );
+    Navigator.pop(context);
   }
 
   @override
