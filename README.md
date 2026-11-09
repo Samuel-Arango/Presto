@@ -19,8 +19,8 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 
 - [x] Pantalla de inicio con splash screen personalizado
 - [x] Splash screen compatible con Android 12+ (`android_12`)
-- [x] Inicio de sesión con validación de formulario
-- [x] Registro de nuevos usuarios con validación de contraseña y confirmación
+- [x] Inicio de sesión con validación contra base de datos (SQLite)
+- [x] Registro de usuarios persistente con correo único y contraseña hasheada (SHA-256)
 - [x] Flujo de autenticación: Login → Registro → Login → Home
 - [x] Pantalla principal (Home) con bienvenida personalizada (nombre de usuario), perfil y sección de préstamos
 - [x] Menú lateral de navegación en el Home (Drawer) hacia Nuevo libro y Registro de préstamos
@@ -43,7 +43,9 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - **Dart** — lenguaje de programación
 - **[flutter_native_splash](https://pub.dev/packages/flutter_native_splash)** — pantalla de carga nativa personalizada
 - **[flutter_launcher_icons](https://pub.dev/packages/flutter_launcher_icons)** — generación de íconos de aplicación
-- **[animate_do](https://pub.dev/packages/animate_do)** — animaciones de UI
+- **[sqflite](https://pub.dev/packages/sqflite)** — base de datos SQLite local (autenticación)
+- **[path](https://pub.dev/packages/path)** — rutas de archivos para la base de datos
+- **[crypto](https://pub.dev/packages/crypto)** — hashing SHA-256 de contraseñas
 
 ---
 
@@ -51,6 +53,9 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 
 ```
 lib/
+├── core/
+│   └── database/
+│       └── database_helper.dart  # Singleton SQLite (tabla users)
 ├── layouts/
 │   ├── barra_superior.dart      # AppBar reutilizable con botón de volver
 │   ├── menu_lateral.dart        # Drawer de navegación del Home
@@ -58,11 +63,14 @@ lib/
 │   └── search_books_view.dart   # Buscador reutilizable con catálogo y sugerencias
 ├── models_books/
 │   ├── book.dart                # Modelo Book (con categoría y fecha) + catálogo reactivo
-│   └── loan.dart                # Modelo de préstamo (Loan) con cálculo de fecha de devolución
+│   ├── loan.dart                # Modelo de préstamo (Loan) con cálculo de fecha de devolución
+│   └── user.dart                # Modelo User (id, name, email, passwordHash)
+├── services/
+│   └── auth_service.dart        # Registro e inicio de sesión contra SQLite (hash SHA-256)
 ├── views/
 │   ├── login_screen.dart        # Pantalla de entrada: degradado + formulario de login
 │   ├── home_page.dart           # Pantalla principal: bienvenida, préstamos, buscador, Drawer
-│   ├── login_page.dart          # Formulario de inicio de sesión (pasa el nombre al Home)
+│   ├── login_page.dart          # Formulario de inicio de sesión (valida contra BD)
 │   ├── registration_page.dart   # Pantalla de registro de usuario (con correo)
 │   ├── loan_registration.dart   # Registro de préstamos con devolución automática a 15 días
 │   └── new_book.dart            # Pantalla para agregar un nuevo libro
@@ -127,7 +135,8 @@ dart run flutter_launcher_icons:generate       # Íconos de app
 
 ## Funcionalidades
 
-### Splash screen
+### Autenticación (backend local)
+Registro e inicio de sesión contra una base de datos SQLite local. Las contraseñas se almacenan hasheadas con SHA-256 (paquete `crypto`). El correo debe ser único; el login acepta nombre de usuario o correo.
 Splash nativo personalizado con soporte para Android 12+ mediante la sección `android_12` en el `pubspec.yaml`.
 
 ### Pantalla principal (Home)
@@ -160,9 +169,9 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 ### Backend
 
-- [ ] Base de datos local (SQLite) o remota (Firebase / API propia)
-- [ ] Persistencia de usuarios, libros y préstamos
-- [ ] Lógica de autenticación real (validar credenciales contra la base de datos)
+- [x] Base de datos local (SQLite) para usuarios y autenticación
+- [x] Lógica de autenticación real (validar credenciales contra la base de datos)
+- [ ] Persistencia de libros y préstamos (hoy en memoria)
 - [ ] Lógica de gestión de préstamos y devoluciones
 - [ ] Notificaciones de devoluciones próximas a vencer
 
