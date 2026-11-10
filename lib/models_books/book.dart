@@ -1,15 +1,36 @@
 import 'package:flutter/foundation.dart';
 
 class Book {
+  final int? id; // Lo asigna la base de datos al guardar el libro.
   final String title;
   final String author;
   final String? category;  //el '?' vuelve los datos opcionales
   final DateTime? publishedDate;
 
-  const Book({required this.title, required this.author, this.category, this.publishedDate});
+  const Book({this.id, required this.title, required this.author, this.category, this.publishedDate});
+
+  // Convierte el libro en un Map para guardarlo en SQLite.
+  Map<String, dynamic> toMap() => {
+        'titulo': title,
+        'autor': author,
+        'categoria': category,
+        'fecha_publicacion': publishedDate?.toIso8601String(),
+      };
+
+  // Crea un libro a partir de una fila leída de SQLite.
+  factory Book.fromMap(Map<String, dynamic> map) => Book(
+        id: map['id'] as int?,
+        title: map['titulo'] as String,
+        author: map['autor'] as String,
+        category: map['categoria'] as String?,
+        publishedDate: map['fecha_publicacion'] == null
+            ? null
+            : DateTime.parse(map['fecha_publicacion'] as String),
+      );
 }
 
-const List<Book> _librosIniciales = [
+// Libros de ejemplo: se guardan en la base de datos la primera vez que se abre la app.
+const List<Book> librosIniciales = [
   Book(title: 'Cien años de soledad', author: 'Gabriel García Márquez'),
   Book(title: 'Don Quijote de la Mancha', author: 'Miguel de Cervantes'),
   Book(title: 'La casa de los espíritus', author: 'Isabel Allende'),
@@ -22,7 +43,8 @@ const List<Book> _librosIniciales = [
   Book(title: 'El túnel', author: 'Ernesto Sabato'),
 ];
 
-final ValueNotifier<List<Book>> books = ValueNotifier<List<Book>>( _librosIniciales);
+// Lista que ven las pantallas. Se llena desde SQLite al abrir la app (LibroService).
+final ValueNotifier<List<Book>> books = ValueNotifier<List<Book>>(librosIniciales);
 
 void addLibro(Book book) {books.value = [...books.value, book];}
 

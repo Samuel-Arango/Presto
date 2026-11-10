@@ -9,7 +9,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._internal();
 
   static const _dbName = 'presto.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   Database? _db;
 
@@ -26,6 +26,7 @@ class DatabaseHelper {
       path,
       version: _dbVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -36,6 +37,27 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL
+      )
+    ''');
+    await _crearTablaLibros(db);
+  }
+
+  // Si la base ya existía (versión 1), agrega la tabla de libros sin borrar los usuarios.
+  Future<void> _onUpgrade(Database db, int versionAnterior, int versionNueva) async {
+    if (versionAnterior < 2) {
+      await _crearTablaLibros(db);
+    }
+  }
+
+  // Tabla donde se guardan los libros del catálogo.
+  Future<void> _crearTablaLibros(Database db) async {
+    await db.execute('''
+      CREATE TABLE libros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        categoria TEXT,
+        fecha_publicacion TEXT
       )
     ''');
   }

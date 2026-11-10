@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../layouts/barra_superior.dart';
 import '../models_books/book.dart';
+import '../services/libro_service.dart';
 
 class NewBook extends StatefulWidget {
   const NewBook({super.key});
@@ -46,8 +47,8 @@ class _NewBookState extends State<NewBook> {
     }
   }
 
-    // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
-  void _guardarLibro() {
+    // Valida el formulario, guarda el libro en SQLite, avisa y limpia los campos.
+  Future<void> _guardarLibro() async {
     if (_formKey.currentState!.validate()) {
       final book = Book(
         title: _titleController.text.trim(),
@@ -55,7 +56,18 @@ class _NewBookState extends State<NewBook> {
         category: _categoria,
         publishedDate: _fechapubli,
       );
-      addLibro(book);
+
+      // Guarda el libro en la base de datos; si falla, avisa y no limpia el formulario.
+      try {
+        await LibroService.instance.insertarLibro(book);
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo guardar el libro. Intenta de nuevo.')),
+        );
+        return;
+      }
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Libro "${book.title}" agregado al catálogo')),
