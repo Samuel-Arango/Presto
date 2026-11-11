@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models_books/book.dart';
+import 'portada_libro.dart';
 
 class SearchBooksView extends StatelessWidget {
   const SearchBooksView({super.key});
@@ -61,7 +62,8 @@ class BookCatalog extends StatelessWidget {
           itemCount: currentBooks.length,
           itemBuilder: (context, index) {
             return ListTile(
-              leading: const Icon(Icons.book),
+              // Portada del libro (o el ícono si no tiene imagen).
+              leading: PortadaLibro(ruta: currentBooks[index].imagen),
               title: Text(currentBooks[index].title),
               subtitle: Text(currentBooks[index].author),
             );
@@ -131,7 +133,7 @@ class _CustomSearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         final book = books[index];
         return ListTile(
-          leading: const Icon(Icons.book),
+          leading: PortadaLibro(ruta: book.imagen),
           title: Text(book.title),
           subtitle: Text(book.author),
           onTap: () {

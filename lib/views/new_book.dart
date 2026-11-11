@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../layouts/barra_superior.dart';
+import '../layouts/selector_imagen.dart';
 import '../models_books/book.dart';
 import '../services/libro_service.dart';
 
@@ -20,6 +21,7 @@ class _NewBookState extends State<NewBook> {
 
   String? _categoria;
   DateTime? _fechapubli;
+  String? _imagen; // Ruta de la portada elegida (opcional).
   int _form = 0;
 
   @override
@@ -55,6 +57,7 @@ class _NewBookState extends State<NewBook> {
         author: _autorController.text.trim(),
         category: _categoria,
         publishedDate: _fechapubli,
+        imagen: _imagen,
       );
 
       // Guarda el libro en la base de datos; si falla, avisa y no limpia el formulario.
@@ -81,6 +84,7 @@ class _NewBookState extends State<NewBook> {
         _autorController.clear();
         _categoria = null;
         _fechapubli = null;
+        _imagen = null;
         _form++;
       });
     }
@@ -194,6 +198,13 @@ class _NewBookState extends State<NewBook> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 24),
+
+              // Portada del libro: cámara o galería (opcional).
+              SelectorImagen(
+                rutaImagen: _imagen,
+                alCambiar: (ruta) => setState(() => _imagen = ruta),
               ),
               const SizedBox(height: 32),
 

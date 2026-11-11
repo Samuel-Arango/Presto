@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permiso para usar la cámara al tomar la foto de portada de un libro. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- La cámara no es obligatoria: la app también se instala en equipos sin cámara. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="presto_first"
         android:name="${applicationName}"
@@ -40,6 +44,10 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Permite que la app encuentre la aplicación de cámara del teléfono. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE"/>
         </intent>
     </queries>
 </manifest>

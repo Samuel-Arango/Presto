@@ -6,8 +6,9 @@ class Book {
   final String author;
   final String? category;  //el '?' vuelve los datos opcionales
   final DateTime? publishedDate;
+  final String? imagen; // Ruta de la portada guardada en el teléfono (opcional).
 
-  const Book({this.id, required this.title, required this.author, this.category, this.publishedDate});
+  const Book({this.id, required this.title, required this.author, this.category, this.publishedDate, this.imagen});
 
   // Convierte el libro en un Map para guardarlo en SQLite.
   Map<String, dynamic> toMap() => {
@@ -15,6 +16,7 @@ class Book {
         'autor': author,
         'categoria': category,
         'fecha_publicacion': publishedDate?.toIso8601String(),
+        'imagen': imagen,
       };
 
   // Crea un libro a partir de una fila leída de SQLite.
@@ -26,6 +28,7 @@ class Book {
         publishedDate: map['fecha_publicacion'] == null
             ? null
             : DateTime.parse(map['fecha_publicacion'] as String),
+        imagen: map['imagen'] as String?,
       );
 }
 

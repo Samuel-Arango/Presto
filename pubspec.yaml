@@ -10,6 +10,8 @@ dependencies:
   animate_do: ^5.1.0
   crypto: ^3.0.3
   flutter_native_splash: ^2.4.8
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
   sqflite: ^2.4.5
   path: any
   flutter:
