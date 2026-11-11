@@ -30,8 +30,10 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Catálogo de libros reactivo (`books` ValueNotifier) que se actualiza al agregar un libro
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
 - [x] Buscador de libros como layout reutilizable (`SearchBooksView`)
+- [x] Libros guardados en SQLite (tabla `libros`): crear y consultar
+- [x] Portada de los libros con cámara o galería (`SelectorImagen`, `PortadaLibro`)
 - [ ] Autenticación real (backend / base de datos)
-- [ ] Persistencia de usuarios y préstamos
+- [ ] Persistencia de préstamos (usuarios y libros ya se guardan en SQLite)
 - [ ] Gestión de préstamos y devoluciones
 - [ ] Panel de administración para bibliotecarios
 
@@ -43,8 +45,10 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - **Dart** — lenguaje de programación
 - **[flutter_native_splash](https://pub.dev/packages/flutter_native_splash)** — pantalla de carga nativa personalizada
 - **[flutter_launcher_icons](https://pub.dev/packages/flutter_launcher_icons)** — generación de íconos de aplicación
-- **[sqflite](https://pub.dev/packages/sqflite)** — base de datos SQLite local (autenticación)
+- **[sqflite](https://pub.dev/packages/sqflite)** — base de datos SQLite local (usuarios y libros)
 - **[path](https://pub.dev/packages/path)** — rutas de archivos para la base de datos
+- **[image_picker](https://pub.dev/packages/image_picker)** — cámara y galería para la portada de los libros
+- **[path_provider](https://pub.dev/packages/path_provider)** — carpeta de la app donde se guardan las portadas
 - **[crypto](https://pub.dev/packages/crypto)** — hashing SHA-256 de contraseñas
 
 ---
@@ -55,18 +59,21 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 lib/
 ├── core/
 │   └── database/
-│       └── database_helper.dart  # Singleton SQLite (tabla users)
+│       └── database_helper.dart  # Singleton SQLite (tablas users y libros)
 ├── layouts/
 │   ├── barra_superior.dart      # AppBar reutilizable con botón de volver
 │   ├── menu_lateral.dart        # Drawer de navegación del Home
+│   ├── portada_libro.dart       # Muestra la portada de un libro (o un ícono si no tiene)
 │   ├── presto_title.dart        # Encabezado con logo y nombre de la app
-│   └── search_books_view.dart   # Buscador reutilizable con catálogo y sugerencias
+│   ├── search_books_view.dart   # Buscador reutilizable con catálogo y sugerencias
+│   └── selector_imagen.dart     # Elige la portada con cámara o galería
 ├── models_books/
-│   ├── book.dart                # Modelo Book (con categoría y fecha) + catálogo reactivo
+│   ├── book.dart                # Modelo Book (categoría, fecha, imagen) + lista reactiva books
 │   ├── loan.dart                # Modelo de préstamo (Loan) con cálculo de fecha de devolución
 │   └── user.dart                # Modelo User (id, name, email, passwordHash)
 ├── services/
-│   └── auth_service.dart        # Registro e inicio de sesión contra SQLite (hash SHA-256)
+│   ├── auth_service.dart        # Registro e inicio de sesión contra SQLite (hash SHA-256)
+│   └── libro_service.dart       # Guarda (insertarLibro) y consulta (obtenerLibros) libros en SQLite
 ├── views/
 │   ├── login_screen.dart        # Pantalla de entrada: degradado + formulario de login
 │   ├── home_page.dart           # Pantalla principal: bienvenida, préstamos, buscador, Drawer
@@ -120,6 +127,13 @@ assets/
    flutter run -d macos     # macOS
    ```
 
+### Notas importantes (después de hacer `git pull`)
+
+- Ejecuta `flutter pub get`: se agregaron `image_picker` y `path_provider`.
+- La base de datos está en la **versión 3** (usuarios y libros con portada). Se actualiza sola al abrir la app: no hace falta desinstalarla ni se pierden datos.
+- **Prueba la app en un teléfono Android.** SQLite (`sqflite`) y la cámara no funcionan en el navegador.
+- Si la compilación en Android falla con `this and base files have different roots`, el proyecto y la caché de paquetes de Flutter están en discos distintos. Solución: agregar la línea `kotlin.incremental=false` al archivo `gradle.properties` global del usuario (en Windows: `C:\Users\<usuario>\.gradle\gradle.properties`). No hay que tocar el proyecto.
+
 ---
 
 ## Configuración de recursos nativos
@@ -152,7 +166,15 @@ Menú deslizable que permite ir a "Inicio", "Nuevo libro" y "Registro de présta
 Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo, se muestra el histórico de préstamos registrados y se sincroniza con la sección "Mis préstamos" del Home.
 
 ### Nuevo libro
-Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Al guardar, agrega el libro a la lista reactiva `books` y limpia el formulario.
+Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Permite agregar una portada opcional con la cámara o la galería. Al guardar, lo registra en SQLite con `LibroService.insertarLibro`, actualiza la lista reactiva `books` y limpia el formulario.
+
+### Libros en SQLite
+Los libros se guardan en la tabla `libros` (id, titulo, autor, categoria, fecha_publicacion, imagen). `LibroService` tiene `insertarLibro` (crear) y `obtenerLibros` (consultar). Al abrir la app, `main.dart` llama a `cargarLibros()`, que llena la lista `books` desde la base de datos; el catálogo, el buscador y el desplegable de préstamos leen esa lista. La primera vez se guardan 10 libros de ejemplo.
+
+Para agregar **editar** y **eliminar** libros: crear en `LibroService` métodos con `db.update` y `db.delete` usando el `id` del `Book` y volver a llamar a `cargarLibros()`. Al eliminar, conviene borrar también el archivo de la portada.
+
+### Portada con cámara o galería
+`SelectorImagen` muestra el botón "Agregar portada" con las opciones "Tomar foto" y "Elegir de la galería" (`image_picker`). La imagen se copia a la carpeta de la app y en SQLite solo se guarda su ruta. `PortadaLibro` la muestra en el catálogo y en los resultados de búsqueda (o un ícono si el libro no tiene imagen). Si el usuario niega el permiso de la cámara, la app avisa y sugiere la galería; el permiso está declarado en `android/app/src/main/AndroidManifest.xml`. `SelectorImagen` es reutilizable (por ejemplo, en una pantalla de edición): recibe la ruta actual y avisa el cambio con `alCambiar`.
 
 ### Inicio de sesión
 Formulario con validación de usuario y contraseña, con opción de redirigir al registro si el usuario no tiene cuenta.
@@ -171,9 +193,12 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 - [x] Base de datos local (SQLite) para usuarios y autenticación
 - [x] Lógica de autenticación real (validar credenciales contra la base de datos)
-- [ ] Persistencia de libros y préstamos (hoy en memoria)
+- [x] Persistencia de libros en SQLite (crear y consultar)
+- [ ] Editar y eliminar libros (Update y Delete)
+- [ ] Persistencia de préstamos (hoy en memoria)
 - [ ] Lógica de gestión de préstamos y devoluciones
-- [ ] Notificaciones de devoluciones próximas a vencer
+- [x] Servicio del dispositivo: cámara y galería
+- [ ] Segundo servicio del dispositivo: notificaciones de devoluciones próximas a vencer
 
 ---
 
