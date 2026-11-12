@@ -36,3 +36,9 @@ final ValueNotifier<List<Loan>> loans = ValueNotifier<List<Loan>>([]);
 void addLoan(Loan loan) {
   loans.value = [...loans.value, loan];
 }
+
+// Indica si un libro tiene algún préstamo registrado.
+// Se usa para no eliminar un libro que está prestado.
+bool libroTienePrestamo(int? idLibro) {
+  return loans.value.any((prestamo) => prestamo.book.id == idLibro);
+}
