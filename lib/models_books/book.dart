@@ -51,10 +51,15 @@ final ValueNotifier<List<Book>> books = ValueNotifier<List<Book>>(librosIniciale
 
 void addLibro(Book book) {books.value = [...books.value, book];}
 
-// Indica si ya existe un libro con el mismo título y autor
-bool existeLibro(String title, String author) {
+// Indica si ya existe un libro con el mismo título y autor.
+// ignorarId: al EDITAR se pasa el id del libro que se está editando, para que
+// no se encuentre a sí mismo y marque "ya está en el catálogo" por error.
+bool existeLibro(String title, String author, {int? ignorarId}) {
   final t = title.trim().toLowerCase();
   final a = author.trim().toLowerCase();
   return books.value.any(
-    (book) => book.title.toLowerCase() == t && book.author.toLowerCase() == a);
+    (book) =>
+        book.id != ignorarId && // Salta el libro que se está editando.
+        book.title.toLowerCase() == t &&
+        book.author.toLowerCase() == a);
 }

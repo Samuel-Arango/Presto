@@ -6,7 +6,8 @@ import '../models_books/book.dart';
 import '../services/libro_service.dart';
 
 class NewBook extends StatefulWidget {
-  const NewBook({super.key});
+  final Book? libro;
+  const NewBook({super.key, this.libro});
 
   @override
   State<NewBook> createState() => _NewBookState();
@@ -23,6 +24,33 @@ class _NewBookState extends State<NewBook> {
   DateTime? _fechapubli;
   String? _imagen; // Ruta de la portada elegida (opcional).
   int _form = 0;
+
+  // true si se abrió la pantalla para editar un libro.
+  bool get _editando => widget.libro != null;
+
+  // initState se ejecuta una sola vez, al abrir la pantalla.
+  // En modo edición, llena el formulario con los datos actuales del libro.
+  @override
+  void initState() {
+    super.initState();
+    final libro = widget.libro;
+    if (libro != null) {
+      _titleController.text = libro.title;
+      _autorController.text = libro.author;
+      _categoria = libro.category;
+      _imagen = libro.imagen;
+      _fechapubli = libro.publishedDate;
+      if (libro.publishedDate != null) {
+        _dateController.text = _textoFecha(libro.publishedDate!);
+      }
+    }
+  }
+
+  // Muestra la fecha como AAAA-MM-DD.
+  String _textoFecha(DateTime fecha) {
+    return "${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}";
+  }
+
 
   @override
   void dispose() {
@@ -43,8 +71,7 @@ class _NewBookState extends State<NewBook> {
     if (picked != null) {
       setState(() {
         _fechapubli = picked;
-        _dateController.text =
-            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dateController.text =  _textoFecha(picked);
       });
     }
   }
@@ -52,6 +79,10 @@ class _NewBookState extends State<NewBook> {
     // Valida el formulario, guarda el libro en SQLite, avisa y limpia los campos.
   Future<void> _guardarLibro() async {
     if (_formKey.currentState!.validate()) {
+      if (_editando) {
+        await _guardarCambios();
+        return;
+      }
       final book = Book(
         title: _titleController.text.trim(),
         author: _autorController.text.trim(),
@@ -91,11 +122,42 @@ class _NewBookState extends State<NewBook> {
   }
 
 
+// UPDATE: guarda los cambios del libro que se está editando y vuelve al catálogo.
+  Future<void> _guardarCambios() async {
+    final libroEditado = Book(
+      // Se conserva el mismo id: así SQLite sabe qué fila actualizar.
+      id: widget.libro!.id,
+      title: _titleController.text.trim(),
+      author: _autorController.text.trim(),
+      category: _categoria,
+      publishedDate: _fechapubli,
+      imagen: _imagen,
+    );
+
+    // Se guarda el mensajero antes del await, porque después la pantalla se cierra.
+    final mensajero = ScaffoldMessenger.of(context);
+    try {
+      await LibroService.instance.actualizarLibro(libroEditado);
+    } catch (_) {
+      mensajero.showSnackBar(
+        const SnackBar(content: Text('No se pudo actualizar el libro. Intenta de nuevo.')),
+      );
+      return;
+    }
+    if (!mounted) return;
+
+    mensajero.showSnackBar(
+      SnackBar(content: Text('Libro "${libroEditado.title}" actualizado')),
+    );
+    // Cierra el formulario y vuelve a la pantalla anterior (el catálogo).
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // Barra superior reutilizable (layouts/barra_superior.dart).
-      appBar: const BarraSuperior(titulo: 'Nuevo libro'),
+      appBar: BarraSuperior(titulo: _editando ? 'Editar libro' : 'Nuevo libro'),
       body: Padding(
         padding: const EdgeInsets.all(64.0),
         child: Form(
@@ -117,7 +179,11 @@ class _NewBookState extends State<NewBook> {
                   if (value.trim().length < 2) {
                     return 'Mínimo 2 caracteres';
                   }
-                  if (existeLibro(value, _autorController.text)) {
+                  if (existeLibro(
+                    value,
+                    _autorController.text,
+                    ignorarId: widget.libro?.id,
+                  )) {
                     return 'Este libro ya está en el catálogo';
                   }
                   return null;
@@ -210,7 +276,7 @@ class _NewBookState extends State<NewBook> {
 
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('Agregar libro'),
+                label: Text(_editando ? 'Guardar cambios' : 'Agregar libro'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                 ),

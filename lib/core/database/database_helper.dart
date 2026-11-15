@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../models_books/book.dart';
 
 // Singleton que gestiona la base de datos SQLite local de la app.
 class DatabaseHelper {
@@ -65,6 +66,12 @@ class DatabaseHelper {
         imagen TEXT
       )
     ''');
+
+    // Guarda los libros de ejemplo UNA sola vez, justo al crear la tabla.
+    // Si el usuario los elimina después, ya no vuelven a aparecer.
+    for (final libro in librosIniciales) {
+      await db.insert('libros', libro.toMap());
+    }
   }
 
   Future<void> close() async {
