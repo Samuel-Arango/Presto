@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+
 import '../../models_books/book.dart';
 
 // Singleton que gestiona la base de datos SQLite local de la app.
@@ -23,7 +24,12 @@ class DatabaseHelper {
   Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
-    return openDatabase(path, version: _dbVersion, onCreate: _onCreate);
+    return openDatabase(
+      path,
+      version: _dbVersion,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -39,7 +45,11 @@ class DatabaseHelper {
   }
 
   // Si la base ya existía, la actualiza sin borrar los datos guardados.
-  Future<void> _onUpgrade(Database db, int versionAnterior, int versionNueva) async {
+  Future<void> _onUpgrade(
+    Database db,
+    int versionAnterior,
+    int versionNueva,
+  ) async {
     if (versionAnterior < 2) {
       // Versión 1: no tenía libros. La tabla nueva ya incluye la columna imagen.
       await _crearTablaLibros(db);

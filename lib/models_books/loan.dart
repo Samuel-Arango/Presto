@@ -60,5 +60,8 @@ bool returnLoan(Loan target) {
 // Lista de préstamos activos (no devueltos).
 List<Loan> activeLoans() => loans.value.where((l) => !l.isReturned).toList();
 
-// Lista de préstamos devueltos.
-List<Loan> returnedLoans() => loans.value.where((l) => l.isReturned).toList();
+// Indica si un libro (por id) tiene algún préstamo registrado (activo o devuelto).
+bool libroTienePrestamo(int? libroId) {
+  if (libroId == null) return false;
+  return loans.value.any((prestamo) => prestamo.book.id == libroId);
+}

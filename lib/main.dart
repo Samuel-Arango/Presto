@@ -8,6 +8,10 @@ import 'views/login_screen.dart';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  await NotificacionService.instance.iniciar();
+  try {
+    await LibroService.instance.cargarLibros();
+  } catch (_) {}
   runApp(
     MaterialApp(debugShowCheckedModeBanner: false, home: const LoginScreen()),
   );
