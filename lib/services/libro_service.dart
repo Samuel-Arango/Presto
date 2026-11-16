@@ -1,6 +1,8 @@
 import '../core/database/database_helper.dart';
 import '../models_books/book.dart';
+
 import 'dart:io';
+
 import '../models_books/loan.dart';
 
 // Servicio de libros: guarda y consulta los libros en SQLite.
@@ -51,7 +53,12 @@ class LibroService {
     loans.value = [
       for (final prestamo in loans.value)
         prestamo.book.id == libro.id
-            ? Loan(user: prestamo.user, book: libro, date: prestamo.date)
+            ? Loan(
+                user: prestamo.user,
+                book: libro,
+                date: prestamo.date,
+                returnedDate: prestamo.returnedDate,
+              )
             : prestamo,
     ];
 
@@ -65,7 +72,6 @@ class LibroService {
     await _borrarImagen(libro.imagen);
     await cargarLibros();
   }
-
 
   // Carga los libros de la base en la lista `books`.
   // Los libros de ejemplo ya no se guardan aquí, sino una sola vez al crear
@@ -82,7 +88,6 @@ class LibroService {
       if (await archivo.exists()) {
         await archivo.delete();
       }
-      } catch (_) {
-    }
+    } catch (_) {}
   }
 }

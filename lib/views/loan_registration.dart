@@ -98,17 +98,23 @@ class _LoanRegistrationState extends State<LoanRegistration> {
   Future<void> _notificar(Loan prestamo) async {
     final mensajero = ScaffoldMessenger.of(context);
     try {
-      final enviadas = await NotificacionService.instance.notificarPrestamo(prestamo);
+      final enviadas = await NotificacionService.instance.notificarPrestamo(
+        prestamo,
+      );
       if (!enviadas) {
         mensajero.showSnackBar(
           const SnackBar(
-            content: Text('Activa el permiso de notificaciones para recibir los avisos del préstamo.'),
+            content: Text(
+              'Activa el permiso de notificaciones para recibir los avisos del préstamo.',
+            ),
           ),
         );
       }
     } catch (_) {
       mensajero.showSnackBar(
-        const SnackBar(content: Text('No se pudieron programar las notificaciones.')),
+        const SnackBar(
+          content: Text('No se pudieron programar las notificaciones.'),
+        ),
       );
     }
   }

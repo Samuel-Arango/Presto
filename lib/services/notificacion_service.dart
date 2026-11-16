@@ -9,7 +9,8 @@ class NotificacionService {
   NotificacionService._internal();
   static final NotificacionService instance = NotificacionService._internal();
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _listo = false;
 
   // Canal de Android: agrupa las notificaciones de préstamos.
@@ -40,7 +41,9 @@ class NotificacionService {
   // Devuelve true si el usuario lo concedió.
   Future<bool> pedirPermiso() async {
     final android = _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     final concedido = await android?.requestNotificationsPermission();
     return concedido ?? false;
   }
@@ -72,13 +75,21 @@ class NotificacionService {
   // Recordatorio: un día antes de la devolución, a las 9:00 a. m.
   Future<void> _programarRecordatorio(int id, Loan prestamo) async {
     final diaAntes = prestamo.dueDate.subtract(const Duration(days: 1));
-    final hora = tz.TZDateTime(tz.local, diaAntes.year, diaAntes.month, diaAntes.day, 9);
+    final hora = tz.TZDateTime(
+      tz.local,
+      diaAntes.year,
+      diaAntes.month,
+      diaAntes.day,
+      9,
+    );
 
     // Si esa hora ya pasó (por ejemplo, préstamo con fecha antigua),
     // el aviso se muestra de inmediato en lugar de programarlo.
     if (!hora.isAfter(tz.TZDateTime.now(tz.local))) {
       final hoy = DateTime.now();
-      final vencido = !prestamo.dueDate.isAfter(DateTime(hoy.year, hoy.month, hoy.day));
+      final vencido = !prestamo.dueDate.isAfter(
+        DateTime(hoy.year, hoy.month, hoy.day),
+      );
       await _plugin.show(
         id,
         'Recordatorio de devolución',

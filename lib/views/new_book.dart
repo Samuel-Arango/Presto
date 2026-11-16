@@ -51,7 +51,6 @@ class _NewBookState extends State<NewBook> {
     return "${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}";
   }
 
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -71,54 +70,83 @@ class _NewBookState extends State<NewBook> {
     if (picked != null) {
       setState(() {
         _fechapubli = picked;
-        _dateController.text =  _textoFecha(picked);
+        _dateController.text = _textoFecha(picked);
       });
     }
   }
 
   // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
-  void _guardarLibro() {
-    if (_formKey.currentState!.validate()) {
-      if (_editando) {
-        await _guardarCambios();
-        return;
-      }
-      final book = Book(
-        title: _titleController.text.trim(),
-        author: _autorController.text.trim(),
-        category: _categoria,
-        publishedDate: _fechapubli,
-        imagen: _imagen,
-      );
-
-      // Guarda el libro en la base de datos; si falla, avisa y no limpia el formulario.
-      try {
-        await LibroService.instance.insertarLibro(book);
-      } catch (_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar el libro. Intenta de nuevo.')),
-        );
-        return;
-      }
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Libro "${book.title}" agregado al catálogo')),
-      );
-
-      FocusScope.of(context).unfocus();
-      _formKey.currentState!.reset();
-      setState(() {
-        _titleController.clear();
-        _dateController.clear();
-        _autorController.clear();
-        _categoria = null;
-        _fechapubli = null;
-        _imagen = null;
-        _form++;
-      });
+  Future<void> _guardarLibro() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_editando) {
+      await _guardarCambios();
+      return;
     }
+    final book = Book(
+      title: _titleController.text.trim(),
+      author: _autorController.text.trim(),
+      category: _categoria,
+      publishedDate: _fechapubli,
+      imagen: _imagen,
+    );
+
+    // Guarda el libro en la base de datos; si falla, avisa y no limpia el formulario.
+    try {
+      await LibroService.instance.insertarLibro(book);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo guardar el libro. Intenta de nuevo.'),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Libro "${book.title}" agregado al catálogo')),
+    );
+
+    FocusScope.of(context).unfocus();
+    _formKey.currentState!.reset();
+    setState(() {
+      _titleController.clear();
+      _dateController.clear();
+      _autorController.clear();
+      _categoria = null;
+      _fechapubli = null;
+      _imagen = null;
+      _form++;
+    });
+  }
+
+  Future<void> _guardarCambios() async {
+    final anterior = widget.libro!;
+    final book = Book(
+      id: anterior.id,
+      title: _titleController.text.trim(),
+      author: _autorController.text.trim(),
+      category: _categoria,
+      publishedDate: _fechapubli,
+      imagen: _imagen,
+    );
+    try {
+      await LibroService.instance.actualizarLibro(book);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo actualizar el libro. Intenta de nuevo.'),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Libro "${book.title}" actualizado')),
+    );
+    Navigator.pop(context);
   }
 
   @override

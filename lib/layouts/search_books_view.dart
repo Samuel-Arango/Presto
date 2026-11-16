@@ -175,12 +175,13 @@ class _MenuLibro extends StatelessWidget {
       );
     } catch (_) {
       mensajero.showSnackBar(
-        const SnackBar(content: Text('No se pudo eliminar el libro. Intenta de nuevo.')),
+        const SnackBar(
+          content: Text('No se pudo eliminar el libro. Intenta de nuevo.'),
+        ),
       );
     }
   }
 }
-
 
 class _CustomSearchDelegate extends SearchDelegate {
   @override

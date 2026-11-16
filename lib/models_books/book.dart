@@ -6,14 +6,37 @@ class Book {
   final String author;
   final String? category; //el '?' vuelve los datos opcionales
   final DateTime? publishedDate;
-  final String? imagen; // Ruta de la portada guardada en el teléfono (opcional).
+  final String?
+  imagen; // Ruta de la portada guardada en el teléfono (opcional).
 
   const Book({
+    this.id,
     required this.title,
     required this.author,
     this.category,
     this.publishedDate,
+    this.imagen,
   });
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'titulo': title,
+    'autor': author,
+    'categoria': category,
+    'fecha_publicacion': publishedDate?.toIso8601String(),
+    'imagen': imagen,
+  };
+
+  factory Book.fromMap(Map<String, dynamic> map) => Book(
+    id: map['id'] as int?,
+    title: map['titulo'] as String,
+    author: map['autor'] as String,
+    category: map['categoria'] as String?,
+    publishedDate: map['fecha_publicacion'] != null
+        ? DateTime.parse(map['fecha_publicacion'] as String)
+        : null,
+    imagen: map['imagen'] as String?,
+  );
 }
 
 // Libros de ejemplo: se guardan en la base de datos la primera vez que se abre la app.
@@ -34,7 +57,7 @@ const List<Book> librosIniciales = [
 ];
 
 final ValueNotifier<List<Book>> books = ValueNotifier<List<Book>>(
-  _librosIniciales,
+  librosIniciales,
 );
 
 void addLibro(Book book) {
@@ -48,6 +71,9 @@ bool existeLibro(String title, String author, {int? ignorarId}) {
   final t = title.trim().toLowerCase();
   final a = author.trim().toLowerCase();
   return books.value.any(
-    (book) => book.title.toLowerCase() == t && book.author.toLowerCase() == a,
+    (book) =>
+        book.title.toLowerCase() == t &&
+        book.author.toLowerCase() == a &&
+        (ignorarId == null || book.id != ignorarId),
   );
 }

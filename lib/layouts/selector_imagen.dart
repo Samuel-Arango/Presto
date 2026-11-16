@@ -91,7 +91,9 @@ class SelectorImagen extends StatelessWidget {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           icon: const Icon(Icons.add_a_photo),
-          label: Text(rutaImagen == null ? 'Agregar portada' : 'Cambiar portada'),
+          label: Text(
+            rutaImagen == null ? 'Agregar portada' : 'Cambiar portada',
+          ),
           onPressed: () => _elegirOrigen(context),
         ),
       ],
