@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'services/libro_service.dart';
+import 'services/notificacion_service.dart';
 import 'views/login_screen.dart';
 
 void main() async {
@@ -14,6 +15,13 @@ void main() async {
   } catch (e) {
     // Si la base de datos falla, la app sigue con los libros de ejemplo.
     debugPrint('No se pudieron cargar los libros: $e');
+  }
+
+  // Prepara las notificaciones; si falla, la app sigue funcionando sin ellas.
+  try {
+    await NotificacionService.instance.iniciar();
+  } catch (e) {
+    debugPrint('No se pudieron iniciar las notificaciones: $e');
   }
 
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: const LoginScreen()));
