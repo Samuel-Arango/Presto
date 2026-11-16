@@ -76,8 +76,8 @@ class _NewBookState extends State<NewBook> {
     }
   }
 
-    // Valida el formulario, guarda el libro en SQLite, avisa y limpia los campos.
-  Future<void> _guardarLibro() async {
+  // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
+  void _guardarLibro() {
     if (_formKey.currentState!.validate()) {
       if (_editando) {
         await _guardarCambios();
@@ -119,38 +119,6 @@ class _NewBookState extends State<NewBook> {
         _form++;
       });
     }
-  }
-
-
-// UPDATE: guarda los cambios del libro que se está editando y vuelve al catálogo.
-  Future<void> _guardarCambios() async {
-    final libroEditado = Book(
-      // Se conserva el mismo id: así SQLite sabe qué fila actualizar.
-      id: widget.libro!.id,
-      title: _titleController.text.trim(),
-      author: _autorController.text.trim(),
-      category: _categoria,
-      publishedDate: _fechapubli,
-      imagen: _imagen,
-    );
-
-    // Se guarda el mensajero antes del await, porque después la pantalla se cierra.
-    final mensajero = ScaffoldMessenger.of(context);
-    try {
-      await LibroService.instance.actualizarLibro(libroEditado);
-    } catch (_) {
-      mensajero.showSnackBar(
-        const SnackBar(content: Text('No se pudo actualizar el libro. Intenta de nuevo.')),
-      );
-      return;
-    }
-    if (!mounted) return;
-
-    mensajero.showSnackBar(
-      SnackBar(content: Text('Libro "${libroEditado.title}" actualizado')),
-    );
-    // Cierra el formulario y vuelve a la pantalla anterior (el catálogo).
-    Navigator.pop(context);
   }
 
   @override

@@ -53,9 +53,9 @@ class HomePage extends StatelessWidget {
 }
 
 class _WelcomeSection extends StatelessWidget {
-    final String nombreUsuario;
+  final String nombreUsuario;
   const _WelcomeSection({required this.nombreUsuario});
-  
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -77,8 +77,8 @@ class _WelcomeSection extends StatelessWidget {
                 const Text(
                   'Bienvenido/a,',
                   style: TextStyle(color: Colors.black54),
-          ),
-          Text(
+                ),
+                Text(
                   nombreUsuario,
                   style: const TextStyle(
                     fontSize: 18,
@@ -171,10 +171,21 @@ class _LoansSection extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Devolución: ${formatDate(loan.dueDate)}',
-                            style: const TextStyle(
-                              color: Colors.black54,
+                            loan.isReturned
+                                ? 'Devuelto: ${formatDate(loan.returnedDate!)}'
+                                : (loan.isOverdue
+                                      ? 'Vencido: ${formatDate(loan.dueDate)}'
+                                      : 'Devolución: ${formatDate(loan.dueDate)}'),
+                            style: TextStyle(
+                              color: loan.isReturned
+                                  ? Colors.green
+                                  : (loan.isOverdue
+                                        ? Colors.red
+                                        : Colors.black54),
                               fontSize: 12,
+                              fontWeight: (loan.isOverdue || loan.isReturned)
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         ],

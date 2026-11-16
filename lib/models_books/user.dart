@@ -12,15 +12,15 @@ class User {
   });
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'email': email,
-        'password': passwordHash,
-      };
+    'name': name,
+    'email': email,
+    'password': passwordHash,
+  };
 
   factory User.fromMap(Map<String, dynamic> map) => User(
-        id: map['id'] as int?,
-        name: map['name'] as String,
-        email: map['email'] as String,
-        passwordHash: map['password'] as String,
-      );
+    id: map['id'] as int?,
+    name: map['name'] as String,
+    email: map['email'] as String,
+    passwordHash: map['password'] as String,
+  );
 }

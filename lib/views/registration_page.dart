@@ -52,9 +52,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cuenta creada con exito')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Cuenta creada con exito')));
     Navigator.pop(context);
   }
 
