@@ -46,7 +46,7 @@ class _NewBookState extends State<NewBook> {
     }
   }
 
-    // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
+  // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
   void _guardarLibro() {
     if (_formKey.currentState!.validate()) {
       final book = Book(
@@ -73,7 +73,6 @@ class _NewBookState extends State<NewBook> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

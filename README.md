@@ -26,6 +26,7 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Menú lateral de navegación en el Home (Drawer) hacia Nuevo libro y Registro de préstamos
 - [x] Barra superior reutilizable (`BarraSuperior`) usada en varias pantallas
 - [x] Registro de préstamos con fecha de devolución automática (15 días)
+- [x] Gestión de préstamos y devoluciones (marcar devuelto, estado vencido/activo)
 - [x] Pantalla "Nuevo libro" con validación de duplicados y campos obligatorios
 - [x] Catálogo de libros reactivo (`books` ValueNotifier) que se actualiza al agregar un libro
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
@@ -149,7 +150,7 @@ Menú deslizable que permite ir a "Inicio", "Nuevo libro" y "Registro de présta
 `BarraSuperior` (PreferredSizeWidget) con botón de volver y título centrado, usada en las pantallas de Registro, Nuevo libro y otras, evitando duplicar el mismo AppBar.
 
 ### Registro de préstamos
-Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo, se muestra el histórico de préstamos registrados y se sincroniza con la sección "Mis préstamos" del Home.
+Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo. Cada préstamo muestra su estado (activo, vencido o devuelto) y permite marcarlo como devuelto. El histórico se sincroniza con la sección "Mis préstamos" del Home, que resalta préstamos vencidos en rojo.
 
 ### Nuevo libro
 Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Al guardar, agrega el libro a la lista reactiva `books` y limpia el formulario.
@@ -171,8 +172,8 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 - [x] Base de datos local (SQLite) para usuarios y autenticación
 - [x] Lógica de autenticación real (validar credenciales contra la base de datos)
+- [x] Lógica de gestión de préstamos y devoluciones
 - [ ] Persistencia de libros y préstamos (hoy en memoria)
-- [ ] Lógica de gestión de préstamos y devoluciones
 - [ ] Notificaciones de devoluciones próximas a vencer
 
 ---

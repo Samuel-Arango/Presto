@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models_books/book.dart';
 
 class SearchBooksView extends StatelessWidget {
@@ -65,9 +66,9 @@ class BookCatalog extends StatelessWidget {
               title: Text(currentBooks[index].title),
               subtitle: Text(currentBooks[index].author),
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 }
