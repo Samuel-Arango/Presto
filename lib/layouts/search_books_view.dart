@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../models_books/book.dart';
+import 'portada_libro.dart';
+import '../models_books/loan.dart';
+import '../services/libro_service.dart';
+import '../views/new_book.dart';
 
 class SearchBooksView extends StatelessWidget {
   const SearchBooksView({super.key});
@@ -62,9 +66,12 @@ class BookCatalog extends StatelessWidget {
           itemCount: currentBooks.length,
           itemBuilder: (context, index) {
             return ListTile(
-              leading: const Icon(Icons.book),
+              // Portada del libro (o el ícono si no tiene imagen).
+              leading: PortadaLibro(ruta: currentBooks[index].imagen),
               title: Text(currentBooks[index].title),
               subtitle: Text(currentBooks[index].author),
+              // Botón ⋮ a la derecha con las opciones Editar y Eliminar.
+              trailing: _MenuLibro(libro: currentBooks[index]),
             );
           },
         );
@@ -72,6 +79,108 @@ class BookCatalog extends StatelessWidget {
     );
   }
 }
+
+// Menú ⋮ de cada libro del catálogo: Editar (UPDATE) y Eliminar (DELETE).
+class _MenuLibro extends StatelessWidget {
+  final Book libro;
+
+  const _MenuLibro({required this.libro});
+
+  @override
+  Widget build(BuildContext context) {
+    // Un libro sin id no está guardado en la base de datos (por ejemplo, si
+    // SQLite falló al abrir la app): no se puede editar ni eliminar.
+    if (libro.id == null) return const SizedBox.shrink();
+
+    // PopupMenuButton muestra el ícono ⋮ y, al tocarlo, una lista de opciones.
+    // onSelected recibe el "value" de la opción elegida.
+    return PopupMenuButton<String>(
+      tooltip: 'Opciones del libro',
+      onSelected: (opcion) {
+        if (opcion == 'editar') {
+          _editar(context);
+        } else if (opcion == 'eliminar') {
+          _eliminar(context);
+        }
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: 'editar',
+          child: ListTile(leading: Icon(Icons.edit), title: Text('Editar')),
+        ),
+        PopupMenuItem(
+          value: 'eliminar',
+          child: ListTile(
+            leading: Icon(Icons.delete, color: Colors.red),
+            title: Text('Eliminar', style: TextStyle(color: Colors.red)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Abre el mismo formulario de "Nuevo libro", pero lleno con este libro.
+  void _editar(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NewBook(libro: libro)),
+    );
+  }
+
+  // Pide confirmación y, si el usuario acepta, borra el libro de SQLite.
+  Future<void> _eliminar(BuildContext context) async {
+    final mensajero = ScaffoldMessenger.of(context);
+
+    // Regla: no se elimina un libro prestado, porque el préstamo quedaría
+    // apuntando a un libro que ya no existe.
+    if (libroTienePrestamo(libro.id)) {
+      mensajero.showSnackBar(
+        SnackBar(
+          content: Text(
+            'No se puede eliminar "${libro.title}": tiene un préstamo registrado.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    // showDialog muestra un cuadro de confirmación y espera la respuesta:
+    // true si toca "Eliminar", false si toca "Cancelar" y null si lo cierra.
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (contextoDialogo) => AlertDialog(
+        title: const Text('Eliminar libro'),
+        content: Text(
+          '¿Eliminar "${libro.title}"? Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(contextoDialogo, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(contextoDialogo, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmado != true) return; // Canceló o cerró el cuadro.
+
+    try {
+      await LibroService.instance.eliminarLibro(libro);
+      mensajero.showSnackBar(
+        SnackBar(content: Text('Libro "${libro.title}" eliminado')),
+      );
+    } catch (_) {
+      mensajero.showSnackBar(
+        const SnackBar(content: Text('No se pudo eliminar el libro. Intenta de nuevo.')),
+      );
+    }
+  }
+}
+
 
 class _CustomSearchDelegate extends SearchDelegate {
   @override
@@ -132,7 +241,7 @@ class _CustomSearchDelegate extends SearchDelegate {
       itemBuilder: (context, index) {
         final book = books[index];
         return ListTile(
-          leading: const Icon(Icons.book),
+          leading: PortadaLibro(ruta: book.imagen),
           title: Text(book.title),
           subtitle: Text(book.author),
           onTap: () {

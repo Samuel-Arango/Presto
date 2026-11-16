@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 class Book {
+  final int? id; // Lo asigna la base de datos al guardar el libro.
   final String title;
   final String author;
   final String? category; //el '?' vuelve los datos opcionales
   final DateTime? publishedDate;
+  final String? imagen; // Ruta de la portada guardada en el teléfono (opcional).
 
   const Book({
     required this.title,
@@ -14,7 +16,8 @@ class Book {
   });
 }
 
-const List<Book> _librosIniciales = [
+// Libros de ejemplo: se guardan en la base de datos la primera vez que se abre la app.
+const List<Book> librosIniciales = [
   Book(title: 'Cien años de soledad', author: 'Gabriel García Márquez'),
   Book(title: 'Don Quijote de la Mancha', author: 'Miguel de Cervantes'),
   Book(title: 'La casa de los espíritus', author: 'Isabel Allende'),
@@ -38,8 +41,10 @@ void addLibro(Book book) {
   books.value = [...books.value, book];
 }
 
-// Indica si ya existe un libro con el mismo título y autor
-bool existeLibro(String title, String author) {
+// Indica si ya existe un libro con el mismo título y autor.
+// ignorarId: al EDITAR se pasa el id del libro que se está editando, para que
+// no se encuentre a sí mismo y marque "ya está en el catálogo" por error.
+bool existeLibro(String title, String author, {int? ignorarId}) {
   final t = title.trim().toLowerCase();
   final a = author.trim().toLowerCase();
   return books.value.any(

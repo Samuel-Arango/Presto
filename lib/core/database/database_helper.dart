@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../models_books/book.dart';
 
 // Singleton que gestiona la base de datos SQLite local de la app.
 class DatabaseHelper {
@@ -9,7 +10,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._internal();
 
   static const _dbName = 'presto.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 3;
 
   Database? _db;
 
@@ -34,6 +35,38 @@ class DatabaseHelper {
         password TEXT NOT NULL
       )
     ''');
+    await _crearTablaLibros(db);
+  }
+
+  // Si la base ya existía, la actualiza sin borrar los datos guardados.
+  Future<void> _onUpgrade(Database db, int versionAnterior, int versionNueva) async {
+    if (versionAnterior < 2) {
+      // Versión 1: no tenía libros. La tabla nueva ya incluye la columna imagen.
+      await _crearTablaLibros(db);
+    } else if (versionAnterior < 3) {
+      // Versión 2: ya tenía libros, solo falta la columna de la portada.
+      await db.execute('ALTER TABLE libros ADD COLUMN imagen TEXT');
+    }
+  }
+
+  // Tabla donde se guardan los libros del catálogo.
+  Future<void> _crearTablaLibros(Database db) async {
+    await db.execute('''
+      CREATE TABLE libros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        titulo TEXT NOT NULL,
+        autor TEXT NOT NULL,
+        categoria TEXT,
+        fecha_publicacion TEXT,
+        imagen TEXT
+      )
+    ''');
+
+    // Guarda los libros de ejemplo UNA sola vez, justo al crear la tabla.
+    // Si el usuario los elimina después, ya no vuelven a aparecer.
+    for (final libro in librosIniciales) {
+      await db.insert('libros', libro.toMap());
+    }
   }
 
   Future<void> close() async {

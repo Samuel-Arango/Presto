@@ -9,8 +9,12 @@ environment:
 dependencies:
   animate_do: ^5.1.0
   crypto: ^3.0.3
+  flutter_local_notifications: ^19.0.0
   flutter_native_splash: ^2.4.8
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
   sqflite: ^2.4.5
+  timezone: ^0.10.0
   path: any
   flutter:
     sdk: flutter

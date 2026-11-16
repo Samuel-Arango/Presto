@@ -31,8 +31,12 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - [x] Catálogo de libros reactivo (`books` ValueNotifier) que se actualiza al agregar un libro
 - [x] Catálogo de libros con búsqueda en tiempo real y sugerencias por título/autor
 - [x] Buscador de libros como layout reutilizable (`SearchBooksView`)
+- [x] Libros guardados en SQLite (tabla `libros`) con CRUD completo: crear, consultar, editar y eliminar
+- [x] Menú ⋮ en cada libro del catálogo para editar o eliminar (con confirmación)
+- [x] Portada de los libros con cámara o galería (`SelectorImagen`, `PortadaLibro`)
+- [x] Notificaciones locales: aviso al registrar un préstamo y recordatorio de devolución (`NotificacionService`)
 - [ ] Autenticación real (backend / base de datos)
-- [ ] Persistencia de usuarios y préstamos
+- [ ] Persistencia de préstamos (usuarios y libros ya se guardan en SQLite)
 - [ ] Gestión de préstamos y devoluciones
 - [ ] Panel de administración para bibliotecarios
 
@@ -44,8 +48,12 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 - **Dart** — lenguaje de programación
 - **[flutter_native_splash](https://pub.dev/packages/flutter_native_splash)** — pantalla de carga nativa personalizada
 - **[flutter_launcher_icons](https://pub.dev/packages/flutter_launcher_icons)** — generación de íconos de aplicación
-- **[sqflite](https://pub.dev/packages/sqflite)** — base de datos SQLite local (autenticación)
+- **[sqflite](https://pub.dev/packages/sqflite)** — base de datos SQLite local (usuarios y libros)
 - **[path](https://pub.dev/packages/path)** — rutas de archivos para la base de datos
+- **[image_picker](https://pub.dev/packages/image_picker)** — cámara y galería para la portada de los libros
+- **[path_provider](https://pub.dev/packages/path_provider)** — carpeta de la app donde se guardan las portadas
+- **[flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)** — notificaciones locales de préstamos y recordatorios
+- **[timezone](https://pub.dev/packages/timezone)** — zona horaria (Bogotá) para programar los recordatorios
 - **[crypto](https://pub.dev/packages/crypto)** — hashing SHA-256 de contraseñas
 
 ---
@@ -56,25 +64,29 @@ Este proyecto está en desarrollo activo. Actualmente incluye:
 lib/
 ├── core/
 │   └── database/
-│       └── database_helper.dart  # Singleton SQLite (tabla users)
+│       └── database_helper.dart  # Singleton SQLite (tablas users y libros)
 ├── layouts/
 │   ├── barra_superior.dart      # AppBar reutilizable con botón de volver
 │   ├── menu_lateral.dart        # Drawer de navegación del Home
+│   ├── portada_libro.dart       # Muestra la portada de un libro (o un ícono si no tiene)
 │   ├── presto_title.dart        # Encabezado con logo y nombre de la app
-│   └── search_books_view.dart   # Buscador reutilizable con catálogo y sugerencias
+│   ├── search_books_view.dart   # Buscador y catálogo reutilizables, con menú ⋮ para editar y eliminar
+│   └── selector_imagen.dart     # Elige la portada con cámara o galería
 ├── models_books/
-│   ├── book.dart                # Modelo Book (con categoría y fecha) + catálogo reactivo
+│   ├── book.dart                # Modelo Book (categoría, fecha, imagen) + lista reactiva books
 │   ├── loan.dart                # Modelo de préstamo (Loan) con cálculo de fecha de devolución
 │   └── user.dart                # Modelo User (id, name, email, passwordHash)
 ├── services/
-│   └── auth_service.dart        # Registro e inicio de sesión contra SQLite (hash SHA-256)
+│   ├── auth_service.dart        # Registro e inicio de sesión contra SQLite (hash SHA-256)
+│   ├── libro_service.dart       # CRUD de libros en SQLite (insertar, obtener, actualizar y eliminar)
+│   └── notificacion_service.dart # Notificaciones locales: aviso de préstamo y recordatorio de devolución
 ├── views/
 │   ├── login_screen.dart        # Pantalla de entrada: degradado + formulario de login
 │   ├── home_page.dart           # Pantalla principal: bienvenida, préstamos, buscador, Drawer
 │   ├── login_page.dart          # Formulario de inicio de sesión (valida contra BD)
 │   ├── registration_page.dart   # Pantalla de registro de usuario (con correo)
-│   ├── loan_registration.dart   # Registro de préstamos con devolución automática a 15 días
-│   └── new_book.dart            # Pantalla para agregar un nuevo libro
+│   ├── loan_registration.dart   # Registro de préstamos (devolución a 15 días) y notificaciones
+│   └── new_book.dart            # Formulario para agregar o editar un libro
 └── main.dart                    # Punto de entrada de la app
 
 assets/
@@ -121,6 +133,14 @@ assets/
    flutter run -d macos     # macOS
    ```
 
+### Notas importantes (después de hacer `git pull`)
+
+- Ejecuta `flutter pub get`: se agregaron `image_picker`, `path_provider`, `flutter_local_notifications` y `timezone`.
+- La base de datos está en la **versión 3** (usuarios y libros con portada). Se actualiza sola al abrir la app: no hace falta desinstalarla ni se pierden datos.
+- **Prueba la app en un teléfono Android.** SQLite (`sqflite`), la cámara y las notificaciones no funcionan en el navegador.
+- Para las notificaciones se modificaron `AndroidManifest.xml` (permisos y receptores) y `android/app/build.gradle.kts` (`coreLibraryDesugaring`, que exige el paquete). Si la compilación en Android falla por esto, revisa esos dos archivos.
+- Si la compilación en Android falla con `this and base files have different roots`, el proyecto y la caché de paquetes de Flutter están en discos distintos. Solución: agregar la línea `kotlin.incremental=false` al archivo `gradle.properties` global del usuario (en Windows: `C:\Users\<usuario>\.gradle\gradle.properties`). No hay que tocar el proyecto.
+
 ---
 
 ## Configuración de recursos nativos
@@ -141,7 +161,7 @@ Registro e inicio de sesión contra una base de datos SQLite local. Las contrase
 Splash nativo personalizado con soporte para Android 12+ mediante la sección `android_12` en el `pubspec.yaml`.
 
 ### Pantalla principal (Home)
-Bienvenida con el nombre del usuario (pasado desde el login), avatar de perfil, menú lateral (Drawer), sección de préstamos (con datos de ejemplo), botón para registrar préstamos y el buscador de libros integrado como layout reutilizable.
+Bienvenida con el nombre del usuario (pasado desde el login), avatar de perfil, menú lateral (Drawer), sección "Mis préstamos" (con los préstamos registrados), botón para registrar préstamos y el buscador de libros integrado como layout reutilizable.
 
 ### Menú lateral (Drawer)
 Menú deslizable que permite ir a "Inicio", "Nuevo libro" y "Registro de préstamos" desde el Home.
@@ -152,8 +172,20 @@ Menú deslizable que permite ir a "Inicio", "Nuevo libro" y "Registro de présta
 ### Registro de préstamos
 Permite registrar un préstamo asignando un usuario y un libro del catálogo. La fecha de devolución se calcula automáticamente a **15 días** del préstamo. Cada préstamo muestra su estado (activo, vencido o devuelto) y permite marcarlo como devuelto. El histórico se sincroniza con la sección "Mis préstamos" del Home, que resalta préstamos vencidos en rojo.
 
-### Nuevo libro
-Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Al guardar, agrega el libro a la lista reactiva `books` y limpia el formulario.
+### Nuevo libro y edición
+Formulario para agregar un libro al catálogo (nombre, fecha de publicación con selector de calendario, categoría desplegable, autor). El mismo formulario se reutiliza para **editar** un libro: llega lleno con sus datos y el botón cambia a "Guardar cambios". Valida duplicados por título+autor, longitud mínima y que el autor no contenga números. Permite agregar una portada opcional con la cámara o la galería. Al guardar, lo registra en SQLite con `LibroService.insertarLibro`, actualiza la lista reactiva `books` y limpia el formulario.
+
+### Libros en SQLite
+Los libros se guardan en la tabla `libros` (id, titulo, autor, categoria, fecha_publicacion, imagen). `LibroService` implementa el CRUD completo: `insertarLibro` (crear), `obtenerLibros` (consultar), `actualizarLibro` (editar) y `eliminarLibro` (borrar). Al abrir la app, `main.dart` llama a `cargarLibros()`, que llena la lista `books` desde la base de datos; el catálogo, el buscador y el desplegable de préstamos leen esa lista. Los 10 libros de ejemplo se guardan una sola vez, al crear la tabla; si se eliminan, no vuelven a aparecer.
+
+### Editar y eliminar libros
+Cada libro del catálogo tiene un menú ⋮ con "Editar" y "Eliminar". Editar abre `NewBook` con el libro cargado (`actualizarLibro`; si se cambia la portada, la foto anterior se borra del teléfono, y el título se actualiza también en "Mis préstamos"). Eliminar pide confirmación, borra el libro de SQLite y su portada, y **no permite eliminar un libro que tenga un préstamo registrado**.
+
+### Portada con cámara o galería
+`SelectorImagen` muestra el botón "Agregar portada" con las opciones "Tomar foto" y "Elegir de la galería" (`image_picker`). La imagen se copia a la carpeta de la app y en SQLite solo se guarda su ruta. `PortadaLibro` la muestra en el catálogo y en los resultados de búsqueda (o un ícono si el libro no tiene imagen). Si el usuario niega el permiso de la cámara, la app avisa y sugiere la galería; el permiso está declarado en `android/app/src/main/AndroidManifest.xml`. `SelectorImagen` es reutilizable (por ejemplo, en una pantalla de edición): recibe la ruta actual y avisa el cambio con `alCambiar`.
+
+### Notificaciones locales
+`NotificacionService` (paquete `flutter_local_notifications`) lanza dos notificaciones al registrar un préstamo: un **aviso inmediato** con el libro y la fecha de devolución, y un **recordatorio** programado un día antes de la devolución, a las 9:00 a. m. (zona horaria de Bogotá). Si esa hora ya pasó, el recordatorio se muestra de inmediato. En Android 13 o superior se pide el permiso de notificaciones; si el usuario lo niega, el préstamo se registra igual y la app avisa. Se usa programación aproximada, que no necesita el permiso de alarmas exactas. Se inicia en `main.dart` y se llama desde `loan_registration.dart`.
 
 ### Inicio de sesión
 Formulario con validación de usuario y contraseña, con opción de redirigir al registro si el usuario no tiene cuenta.
@@ -172,9 +204,11 @@ Catálogo de libros con búsqueda en tiempo real y sugerencias por título o aut
 
 - [x] Base de datos local (SQLite) para usuarios y autenticación
 - [x] Lógica de autenticación real (validar credenciales contra la base de datos)
-- [x] Lógica de gestión de préstamos y devoluciones
-- [ ] Persistencia de libros y préstamos (hoy en memoria)
-- [ ] Notificaciones de devoluciones próximas a vencer
+- [x] Persistencia de libros en SQLite con CRUD completo (crear, consultar, editar y eliminar)
+- [ ] Persistencia de préstamos (hoy en memoria)
+- [ ] Lógica de gestión de préstamos y devoluciones
+- [x] Servicio del dispositivo: cámara y galería
+- [x] Servicio del dispositivo: notificaciones de préstamo y recordatorio de devolución
 
 ---
 

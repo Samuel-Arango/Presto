@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../layouts/barra_superior.dart';
 import '../models_books/book.dart';
 import '../models_books/loan.dart';
+import '../services/notificacion_service.dart';
 
 // Pantalla para registrar el préstamo de un libro a un usuario (RF09).
 class LoanRegistration extends StatefulWidget {
@@ -86,6 +87,29 @@ class _LoanRegistrationState extends State<LoanRegistration> {
         _formVersion++;
         _setDate(DateTime.now());
       });
+
+      // Servicio del dispositivo: notificación de aviso y recordatorio de devolución.
+      _notificar(loan);
+    }
+  }
+
+  // Lanza las notificaciones del préstamo. Si el usuario no da el permiso o algo
+  // falla, la app avisa con un mensaje y el préstamo queda registrado igual.
+  Future<void> _notificar(Loan prestamo) async {
+    final mensajero = ScaffoldMessenger.of(context);
+    try {
+      final enviadas = await NotificacionService.instance.notificarPrestamo(prestamo);
+      if (!enviadas) {
+        mensajero.showSnackBar(
+          const SnackBar(
+            content: Text('Activa el permiso de notificaciones para recibir los avisos del préstamo.'),
+          ),
+        );
+      }
+    } catch (_) {
+      mensajero.showSnackBar(
+        const SnackBar(content: Text('No se pudieron programar las notificaciones.')),
+      );
     }
   }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../layouts/barra_superior.dart';
+import '../layouts/selector_imagen.dart';
 import '../models_books/book.dart';
+import '../services/libro_service.dart';
 
 class NewBook extends StatefulWidget {
-  const NewBook({super.key});
+  final Book? libro;
+  const NewBook({super.key, this.libro});
 
   @override
   State<NewBook> createState() => _NewBookState();
@@ -19,7 +22,35 @@ class _NewBookState extends State<NewBook> {
 
   String? _categoria;
   DateTime? _fechapubli;
+  String? _imagen; // Ruta de la portada elegida (opcional).
   int _form = 0;
+
+  // true si se abrió la pantalla para editar un libro.
+  bool get _editando => widget.libro != null;
+
+  // initState se ejecuta una sola vez, al abrir la pantalla.
+  // En modo edición, llena el formulario con los datos actuales del libro.
+  @override
+  void initState() {
+    super.initState();
+    final libro = widget.libro;
+    if (libro != null) {
+      _titleController.text = libro.title;
+      _autorController.text = libro.author;
+      _categoria = libro.category;
+      _imagen = libro.imagen;
+      _fechapubli = libro.publishedDate;
+      if (libro.publishedDate != null) {
+        _dateController.text = _textoFecha(libro.publishedDate!);
+      }
+    }
+  }
+
+  // Muestra la fecha como AAAA-MM-DD.
+  String _textoFecha(DateTime fecha) {
+    return "${fecha.year}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}";
+  }
+
 
   @override
   void dispose() {
@@ -40,8 +71,7 @@ class _NewBookState extends State<NewBook> {
     if (picked != null) {
       setState(() {
         _fechapubli = picked;
-        _dateController.text =
-            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dateController.text =  _textoFecha(picked);
       });
     }
   }
@@ -49,13 +79,29 @@ class _NewBookState extends State<NewBook> {
   // Valida el formulario, agrega el libro al catálogo, avisa y limpia los campos.
   void _guardarLibro() {
     if (_formKey.currentState!.validate()) {
+      if (_editando) {
+        await _guardarCambios();
+        return;
+      }
       final book = Book(
         title: _titleController.text.trim(),
         author: _autorController.text.trim(),
         category: _categoria,
         publishedDate: _fechapubli,
+        imagen: _imagen,
       );
-      addLibro(book);
+
+      // Guarda el libro en la base de datos; si falla, avisa y no limpia el formulario.
+      try {
+        await LibroService.instance.insertarLibro(book);
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo guardar el libro. Intenta de nuevo.')),
+        );
+        return;
+      }
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Libro "${book.title}" agregado al catálogo')),
@@ -69,6 +115,7 @@ class _NewBookState extends State<NewBook> {
         _autorController.clear();
         _categoria = null;
         _fechapubli = null;
+        _imagen = null;
         _form++;
       });
     }
@@ -78,7 +125,7 @@ class _NewBookState extends State<NewBook> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Barra superior reutilizable (layouts/barra_superior.dart).
-      appBar: const BarraSuperior(titulo: 'Nuevo libro'),
+      appBar: BarraSuperior(titulo: _editando ? 'Editar libro' : 'Nuevo libro'),
       body: Padding(
         padding: const EdgeInsets.all(64.0),
         child: Form(
@@ -100,7 +147,11 @@ class _NewBookState extends State<NewBook> {
                   if (value.trim().length < 2) {
                     return 'Mínimo 2 caracteres';
                   }
-                  if (existeLibro(value, _autorController.text)) {
+                  if (existeLibro(
+                    value,
+                    _autorController.text,
+                    ignorarId: widget.libro?.id,
+                  )) {
                     return 'Este libro ya está en el catálogo';
                   }
                   return null;
@@ -182,11 +233,18 @@ class _NewBookState extends State<NewBook> {
                   return null;
                 },
               ),
+              const SizedBox(height: 24),
+
+              // Portada del libro: cámara o galería (opcional).
+              SelectorImagen(
+                rutaImagen: _imagen,
+                alCambiar: (ruta) => setState(() => _imagen = ruta),
+              ),
               const SizedBox(height: 32),
 
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('Agregar libro'),
+                label: Text(_editando ? 'Guardar cambios' : 'Agregar libro'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                 ),
