@@ -9,20 +9,27 @@ class DatabaseHelper {
   DatabaseHelper._internal();
   static final DatabaseHelper instance = DatabaseHelper._internal();
 
+  // Nombre del archivo de la base de datos dentro del teléfono.
   static const _dbName = 'presto.db';
+  // Versión de la base: sube cuando cambian las tablas (ver _onUpgrade).
   static const _dbVersion = 3;
 
+  // Conexión a la base de datos. Es null hasta la primera vez que se usa.
   Database? _db;
 
+  // Entrega la conexión. Si todavía no está abierta, la abre; así se abre una sola vez.
   Future<Database> get database async {
     if (_db != null) return _db!;
     _db = await _initDb();
     return _db!;
   }
 
+  // Abre la base: busca la carpeta de bases de datos del teléfono, arma la ruta
+  // de presto.db y llama a openDatabase (de sqflite).
   Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
+    // onCreate se ejecuta la primera vez; onUpgrade, cuando sube la versión.
     return openDatabase(
       path,
       version: _dbVersion,
@@ -31,7 +38,10 @@ class DatabaseHelper {
     );
   }
 
+  // Se ejecuta solo la primera vez, cuando el archivo de la base todavía no existe:
+  // crea la tabla de usuarios y la de libros.
   Future<void> _onCreate(Database db, int version) async {
+    // Tabla de usuarios: el correo es único y la contraseña se guarda cifrada.
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,6 +84,7 @@ class DatabaseHelper {
     }
   }
 
+  // Cierra la conexión con la base de datos.
   Future<void> close() async {
     final db = _db;
     if (db != null) {

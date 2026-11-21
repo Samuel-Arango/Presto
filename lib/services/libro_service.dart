@@ -3,11 +3,13 @@ import '../models_books/book.dart';
 import 'dart:io';
 import '../models_books/loan.dart';
 
-// Servicio de libros: guarda y consulta los libros en SQLite.
+// Servicio de libros: CRUD (crear, consultar, editar y eliminar) de la tabla
+// libros en SQLite. Las pantallas no escriben SQL: le piden al servicio.
 class LibroService {
   LibroService._internal();
   static final LibroService instance = LibroService._internal();
 
+  // Conexión compartida a la base de datos (database_helper.dart).
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // CREATE: guarda un libro nuevo y actualiza la lista que ven las pantallas.
@@ -69,6 +71,7 @@ class LibroService {
 
   // Carga los libros de la base en la lista `books`.
   // Los libros de ejemplo ya no se guardan aquí, sino una sola vez al crear
+  // la tabla (database_helper.dart). Así el catálogo y el buscador leen esta lista.
   Future<void> cargarLibros() async {
     books.value = await obtenerLibros();
   }
