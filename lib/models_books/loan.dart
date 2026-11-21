@@ -2,43 +2,66 @@ import 'package:flutter/foundation.dart';
 
 import 'book.dart';
 
-// Días de plazo que tiene el usuario para devolver el libro.
 const int loanDays = 15;
 
-// Un préstamo: quién lo hizo, qué libro es y desde cuándo.
 class Loan {
   final String user;
   final Book book;
   final DateTime date;
+  final DateTime? returnedDate;
 
-  const Loan({required this.user, required this.book, required this.date});
+  const Loan({
+    required this.user,
+    required this.book,
+    required this.date,
+    this.returnedDate,
+  });
 
-  // La fecha de devolución no se guarda: se calcula desde la fecha del préstamo.
   DateTime get dueDate => dueDateFrom(date);
+
+  bool get isReturned => returnedDate != null;
+
+  bool get isOverdue => !isReturned && DateTime.now().isAfter(dueDate);
+
+  Loan copyWith({DateTime? returnedDate, bool clearReturned = false}) {
+    return Loan(
+      user: user,
+      book: book,
+      date: date,
+      returnedDate: clearReturned ? null : (returnedDate ?? this.returnedDate),
+    );
+  }
 }
 
-// Suma los días del plazo; DateTime ajusta solo el mes y el año si hace falta.
 DateTime dueDateFrom(DateTime date) {
   return DateTime(date.year, date.month, date.day + loanDays);
 }
 
-// Muestra la fecha como AAAA-MM-DD.
 String formatDate(DateTime date) {
   return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
 }
 
-// Lista de préstamos "observable": los widgets que la escuchan se
-// actualizan solos cuando cambia.
 final ValueNotifier<List<Loan>> loans = ValueNotifier<List<Loan>>([]);
 
-// Se crea una lista nueva (no se modifica la anterior) para que el
-// ValueNotifier detecte el cambio y avise.
 void addLoan(Loan loan) {
   loans.value = [...loans.value, loan];
 }
 
-// Indica si un libro tiene algún préstamo registrado.
-// Se usa para no eliminar un libro que está prestado.
-bool libroTienePrestamo(int? idLibro) {
-  return loans.value.any((prestamo) => prestamo.book.id == idLibro);
+// Marca un préstamo como devuelto (fecha actual). Devuelve true si se encontró.
+bool returnLoan(Loan target) {
+  final index = loans.value.indexOf(target);
+  if (index == -1) return false;
+  final updated = [...loans.value];
+  updated[index] = updated[index].copyWith(returnedDate: DateTime.now());
+  loans.value = updated;
+  return true;
+}
+
+// Lista de préstamos activos (no devueltos).
+List<Loan> activeLoans() => loans.value.where((l) => !l.isReturned).toList();
+
+// Indica si un libro (por id) tiene algún préstamo registrado (activo o devuelto).
+bool libroTienePrestamo(int? libroId) {
+  if (libroId == null) return false;
+  return loans.value.any((prestamo) => prestamo.book.id == libroId);
 }

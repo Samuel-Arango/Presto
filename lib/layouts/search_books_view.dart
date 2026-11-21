@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models_books/book.dart';
 import 'portada_libro.dart';
 import '../models_books/loan.dart';
@@ -72,9 +73,9 @@ class BookCatalog extends StatelessWidget {
               // Botón ⋮ a la derecha con las opciones Editar y Eliminar.
               trailing: _MenuLibro(libro: currentBooks[index]),
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 }
@@ -174,12 +175,13 @@ class _MenuLibro extends StatelessWidget {
       );
     } catch (_) {
       mensajero.showSnackBar(
-        const SnackBar(content: Text('No se pudo eliminar el libro. Intenta de nuevo.')),
+        const SnackBar(
+          content: Text('No se pudo eliminar el libro. Intenta de nuevo.'),
+        ),
       );
     }
   }
 }
-
 
 class _CustomSearchDelegate extends SearchDelegate {
   @override

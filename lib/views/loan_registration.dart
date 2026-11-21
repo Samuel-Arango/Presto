@@ -98,17 +98,23 @@ class _LoanRegistrationState extends State<LoanRegistration> {
   Future<void> _notificar(Loan prestamo) async {
     final mensajero = ScaffoldMessenger.of(context);
     try {
-      final enviadas = await NotificacionService.instance.notificarPrestamo(prestamo);
+      final enviadas = await NotificacionService.instance.notificarPrestamo(
+        prestamo,
+      );
       if (!enviadas) {
         mensajero.showSnackBar(
           const SnackBar(
-            content: Text('Activa el permiso de notificaciones para recibir los avisos del préstamo.'),
+            content: Text(
+              'Activa el permiso de notificaciones para recibir los avisos del préstamo.',
+            ),
           ),
         );
       }
     } catch (_) {
       mensajero.showSnackBar(
-        const SnackBar(content: Text('No se pudieron programar las notificaciones.')),
+        const SnackBar(
+          content: Text('No se pudieron programar las notificaciones.'),
+        ),
       );
     }
   }
@@ -222,15 +228,46 @@ class _LoanRegistrationState extends State<LoanRegistration> {
                 ),
                 const SizedBox(height: 8),
                 for (final loan in loans.value.reversed)
-                  ListTile(
-                    leading: const Icon(Icons.book),
-                    title: Text(loan.book.title),
-                    subtitle: Text(
-                      '${loan.user}\n'
-                      'Préstamo: ${formatDate(loan.date)}  ·  '
-                      'Devolución: ${formatDate(loan.dueDate)}',
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: Icon(
+                        loan.isReturned
+                            ? Icons.check_circle
+                            : (loan.isOverdue
+                                  ? Icons.warning_amber
+                                  : Icons.book),
+                        color: loan.isReturned
+                            ? Colors.green
+                            : (loan.isOverdue ? Colors.red : null),
+                      ),
+                      title: Text(loan.book.title),
+                      subtitle: Text(
+                        '${loan.user}\n'
+                        'Préstamo: ${formatDate(loan.date)}  ·  '
+                        'Devolución: ${formatDate(loan.dueDate)}'
+                        '${loan.isReturned ? '\nDevuelto: ${formatDate(loan.returnedDate!)}' : ''}',
+                      ),
+                      isThreeLine: true,
+                      trailing: loan.isReturned
+                          ? const Text(
+                              'Devuelto',
+                              style: TextStyle(color: Colors.green),
+                            )
+                          : (loan.isOverdue
+                                ? const Text(
+                                    'Vencido',
+                                    style: TextStyle(color: Colors.red),
+                                  )
+                                : TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        returnLoan(loan);
+                                      });
+                                    },
+                                    child: const Text('Devolver'),
+                                  )),
                     ),
-                    isThreeLine: true,
                   ),
               ],
             ],

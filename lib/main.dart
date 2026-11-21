@@ -8,21 +8,11 @@ import 'views/login_screen.dart';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
-  // Carga los libros guardados en SQLite antes de mostrar la app.
+  await NotificacionService.instance.iniciar();
   try {
     await LibroService.instance.cargarLibros();
-  } catch (e) {
-    // Si la base de datos falla, la app sigue con los libros de ejemplo.
-    debugPrint('No se pudieron cargar los libros: $e');
-  }
-
-  // Prepara las notificaciones; si falla, la app sigue funcionando sin ellas.
-  try {
-    await NotificacionService.instance.iniciar();
-  } catch (e) {
-    debugPrint('No se pudieron iniciar las notificaciones: $e');
-  }
-
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: const LoginScreen()));
+  } catch (_) {}
+  runApp(
+    MaterialApp(debugShowCheckedModeBanner: false, home: const LoginScreen()),
+  );
 }
